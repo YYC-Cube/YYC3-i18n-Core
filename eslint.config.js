@@ -44,6 +44,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'src/test/**', 'vitest.config.ts', 'tsup.config.ts', '*.js', '*.mjs', '*.cjs'],
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'src/test/**', 'packages/**', 'vitest.config.ts', 'tsup.config.ts', '*.js', '*.mjs', '*.cjs', 'docs/**'],
   }
 )

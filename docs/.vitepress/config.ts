@@ -32,7 +32,7 @@ export default defineConfig({
         items: [
           {
             text: 'GitHub',
-            link: 'https://github.com/YanYuCloudCube/yyc3-i18n-core',
+            link: 'https://github.com/YYC-Cube/YYC3-i18n-Core',
           },
           {
             text: 'NPM 包',
@@ -40,7 +40,7 @@ export default defineConfig({
           },
           {
             text: '更新日志',
-            link: 'https://github.com/YanYuCloudCube/yyc3-i18n-core/blob/main/CHANGELOG.md',
+            link: 'https://github.com/YYC-Cube/YYC3-i18n-Core/blob/main/CHANGELOG.md',
           },
         ],
       },
@@ -106,7 +106,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/YanYuCloudCube/yyc3-i18n-core' },
+      { icon: 'github', link: 'https://github.com/YYC-Cube/YYC3-i18n-Core' },
     ],
 
     footer: {
@@ -115,7 +115,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/YanYuCloudCube/yyc3-i18n-core/edit/main/docs/:path',
+      pattern: 'https://github.com/YYC-Cube/YYC3-i18n-Core/edit/main/docs/:path',
       text: '在 GitHub 上编辑此页',
     },
 

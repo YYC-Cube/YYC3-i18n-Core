@@ -1,5 +1,11 @@
 # @yyc3/i18n-core
 
+<div align="center">
+  <img src="Public/Family-001.png" alt="YYC³ Family" width="100%" style="max-width: 896px; border-radius: 12px;" />
+</div>
+
+<br/>
+
 > **🌐 YYC³ Production-Ready Internationalization Framework**
 >
 > 高性能、插件化、零依赖的 i18n 解决方案，专为现代 Web 应用设计

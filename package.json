@@ -34,12 +34,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YanYuCloudCube/YYC3-FAmily-Pai.git",
-    "directory": "packages/i18n-core"
+    "url": "https://github.com/YYC-Cube/YYC3-i18n-Core.git"
   },
-  "homepage": "https://github.com/YanYuCloudCube/YYC3-FAmily-Pai#readme",
+  "homepage": "https://github.com/YYC-Cube/YYC3-i18n-Core#readme",
   "bugs": {
-    "url": "https://github.com/YanYuCloudCube/YYC3-FAmily-Pai/issues"
+    "url": "https://github.com/YYC-Cube/YYC3-i18n-Core/issues"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
