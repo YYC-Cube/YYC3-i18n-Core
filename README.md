@@ -1,26 +1,86 @@
 # @yyc3/i18n-core
 
 > **🌐 YYC³ Production-Ready Internationalization Framework**
-> 
+>
 > 高性能、插件化、零依赖的 i18n 解决方案，专为现代 Web 应用设计
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@yyc3/i18n-core"><img src="https://img.shields.io/npm/v/@yyc3/i18n-core.svg?style=flat-square&color=blue" alt="npm version" /></a>
-  <a href="https://github.com/YanYuCloudCube/Family-PAI/blob/main/packages/i18n-core/LICENSE"><img src="https://img.shields.io/npm/l/@yyc3/i18n-core.svg?style=flat-square&color=brightgreen" alt="MIT License" /></a>
+  <a href="https://github.com/YYC-Cube/YYC3-i18n-Core/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@yyc3/i18n-core.svg?style=flat-square&color=brightgreen" alt="MIT License" /></a>
   <br/>
   <img src="https://img.shields.io/badge/TypeScript-5.3+-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/node/v/%3E%3D16.0.0.svg?style=flat-square&color=339933" alt="Node.js >=16" />
   <img src="https://img.shields.io/badge/dependencies-0-success?style=flat-square" alt="Zero Dependencies" />
   <br/>
-  <img src="https://img.shields.io/badge/tests-443%20passed-brightgreen?style=flat-square" alt="443 Tests Passed" />
-  <img src="https://img.shields.io/badge/coverage-92.5%25-brightgreen?style=flat-square" alt="92.5% Coverage" />
+  <img src="https://img.shields.io/badge/tests-621%20passed-brightgreen?style=flat-square" alt="621 Tests Passed" />
+  <img src="https://img.shields.io/badge/coverage-96.81%25-brightgreen?style=flat-square" alt="96.81% Coverage" />
   <img src="https://img.shields.io/badge/security-OWASP%20L4-blue?style=flat-square" alt="OWASP Level 4" />
 </p>
 
 ---
 
-## 📋 目录
+## 概述
 
+**@yyc3/i18n-core** 是 YYC³（YanYuCloudCube）智能应用链中的**国际化基础设施层**，为整个生态提供多语言、AI翻译、MCP协议集成能力。它不仅是一个独立的 i18n 框架，更是 YYC³ 生态「五高五标五化五维」核心理念在国际化领域的具体落地。
+
+### 在 YYC³ 生态中的定位
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    YYC³ 智能应用生态                             │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│  │  YYC³-CLI   │  │  YYC³-π³    │  │  Family-PAI │             │
+│  │  文档生成    │  │  设计工具    │  │  AI应用链    │             │
+│  │  引擎       │  │  组件插件    │  │             │             │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘             │
+│         │                │                │                     │
+│         └────────────────┼────────────────┘                     │
+│                          │                                      │
+│                   ┌──────▼──────┐                               │
+│                   │ @yyc3/i18n  │  ← 当前项目                    │
+│                   │   -core     │                               │
+│                   └──────┬──────┘                               │
+│                          │                                      │
+│            ┌─────────────┼─────────────┐                        │
+│            ▼             ▼             ▼                        │
+│     ┌────────────┐ ┌──────────┐ ┌───────────┐                   │
+│     │ AI翻译引擎 │ │MCP Server│ │ICU编译器  │                   │
+│     │(OpenAI+    │ │(AI Agent │ │(10语言+   │                   │
+│     │ Ollama)    │ │ 工具集成) │ │ RTL支持)  │                   │
+│     └────────────┘ └──────────┘ └───────────┘                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 与 YYC³-CLI 的衔接
+
+[YYC³-CLI](https://github.com/YYC-Cube/YYC3-CLI) 是 YYC³ 生态的**文档全生命周期生成引擎**（v2.0.0），负责项目初始化、标准化文档生成、DevOps运维。`@yyc3/i18n-core` 与其形成以下协同：
+
+| 协同场景 | CLI 职责 | i18n-core 职责 |
+|---------|---------|---------------|
+| **项目初始化** | `yyc3 init` 生成项目骨架 | 自动注入 i18n 配置（locales/ + 引擎实例） |
+| **多语言文档** | 生成符合 YYC³ 标准的文档架构 | 为生成的文档提供 10 语言翻译支持 |
+| **AI 赋能** | AI 驱动的文档/代码生成 | AI 翻译引擎（OpenAI + Ollama）复用同一 AI 基础设施 |
+| **MCP 协议** | AI Agent 工具链编排 | 提供 i18n MCP Server 作为 Agent 可调用工具 |
+| **CI/CD 集成** | DevOps 流水线编排 | 提供 `i18n audit/translate` 命令嵌入流水线 |
+
+### 核心价值主张
+
+| 维度 | 传统 i18n 方案 | @yyc3/i18n-core |
+|------|--------------|-----------------|
+| **AI 翻译** | 需外接 SaaS / 手动翻译 | 原生集成 OpenAI + Ollama 双引擎 |
+| **AI 协作** | 无 AI Agent 接口 | 行业首个 i18n MCP Server（7 个工具） |
+| **依赖链** | 3-10 个运行时依赖 | **零依赖** — 无供应链风险 |
+| **安全** | 基础正则 | OWASP L4 安全矩阵（ReDoS防护/密钥等值/速率限制） |
+| **生态** | 独立工具 | YYC³ 智能应用链原生组件 |
+
+> **战略方向**: 详见 [行业技术趋势分析与全链路落地方案](docs/INDUSTRY_TREND_ANALYSIS.md) — MCP协议生态爆发（15,382+ Server / 9700万SDK月下载），i18n MCP Server 占比<1%，@yyc3/i18n-core 正处于这个蓝海赛道的核心位置。
+
+---
+
+## �� 目录
+
+- [概述](#-概述)
 - [特性概览](#-特性概览)
 - [为什么选择 @yyc3/i18n-core](#-为什么选择-yyc3i18n-core)
 - [安装指南](#-安装指南)
@@ -225,7 +285,7 @@ function App() {
     <div>
       <h1>{t('app.title')}</h1>
       <p>{t('greeting', { name: 'User' })}</p>
-      
+
       <select value={locale} onChange={(e) => setLocale(e.target.value)}>
         <option value="en">English</option>
         <option value="zh-CN">中文</option>
@@ -270,7 +330,7 @@ const i18n = new I18nEngine({
 export function middleware(req, res, next) {
   const locale = req.headers['accept-language']?.split(',')[0] || 'zh-CN';
   i18n.setLocale(locale);
-  
+
   req.t = (key, params?) => i18n.t(key, params);
   next();
 }
@@ -463,17 +523,17 @@ i18n.plugins.register(new PerformanceTracker({ slowThreshold: 10 }).createPlugin
 // 自定义插件
 i18n.plugins.register({
   name: 'analytics-plugin',
-  
+
   beforeTranslate(key: string) {
     console.log(`[Analytics] Translating: ${key}`);
     // 返回 true 继续执行，返回 false 中断
     return true;
   },
-  
+
   afterTranslate(result: string, key: string) {
     console.log(`[Analytics] Result: ${result}`);
   },
-  
+
   onLocaleChange(from: string, to: string) {
     console.log(`[Analytics] Locale: ${from} -> ${to}`);
   },
@@ -741,30 +801,30 @@ import { MCPServer, registerI18nTools } from '@yyc3/i18n-core/mcp'
 import {
   // Engine
   I18nEngine, i18n, t,
-  
+
   // Cache
   LRUCache,
   type CacheConfig, type CacheStats,
-  
+
   // Plugins
   PluginManager,
   createConsoleLogger, MissingKeyReporter, PerformanceTracker,
   type I18nContext, type I18nPlugin,
-  
+
   // Formatter
   formatRelativeTime, interpolate, pluralize,
   type TranslateParams,
-  
+
   // Locale Detection
   detectSystemLocale, isChineseLocale, normalizeLocale,
   type LocaleDetectionResult,
-  
+
   // RTL Utilities
   isRTL, setupDocumentDirection, flipSpacing, getAlignment,
   getDirection, getOppositeAlignment, mirrorPosition,
   createMirroredLayout, transformClassForRTL,
   type HorizontalAlignment, type TextDirection,
-  
+
   // Types
   type Locale, type RTLLocale, type TranslationMap,
 } from '@yyc3/i18n-core'
@@ -833,19 +893,19 @@ i18n.onLocaleChange((from, to) => {});
 ```typescript
 class I18nEngine {
   constructor(config?: I18nEngineConfig);
-  
+
   init(): Promise<void>;
   destroy(): Promise<void>;
-  
+
   setLocale(locale: string): Promise<void>;
   t(key: string, params?: TranslateParams): string;
   batchTranslate(keys: string[]): Promise<Record<string, string>>;
-  
+
   getTranslations(): TranslationMap;
   getStats(): EngineStats;
-  
+
   onLocaleChange(callback: (from: string, to: string) => void): () => void;
-  
+
   plugins: PluginManager;
 }
 ```
@@ -941,22 +1001,26 @@ console.log(report.slowQueries);     // 慢查询列表
 ### ✅ 推荐做法
 
 1. **使用全局单例进行简单项目**
+
    ```typescript
    import { i18n, t } from '@yyc3/i18n-core';
    t('key'); // 简洁明了
    ```
 
 2. **使用独立实例进行大型项目**
+
    ```typescript
    const engine = new I18nEngine({ /* config */ });
    ```
 
 3. **利用 Tree Shaking 减小体积**
+
    ```typescript
    import { ICUParser } from '@yyc3/i18n-core/icu'; // 仅引入所需模块
    ```
 
 4. **启用生产环境插件**
+
    ```typescript
    if (process.env.NODE_ENV === 'production') {
      i18n.plugins.register(new MissingKeyReporter().createPlugin());
@@ -964,6 +1028,7 @@ console.log(report.slowQueries);     // 慢查询列表
    ```
 
 5. **结合 AI 翻译提升效率**
+
    ```typescript
    const ai = new AIProviderManager();
    ai.register(new OllamaProvider()); // 免费本地翻译
@@ -972,21 +1037,23 @@ console.log(report.slowQueries);     // 慢查询列表
 ### ❌ 避免做法
 
 1. **不要在循环中频繁调用 `setLocale`**
+
    ```typescript
    // ❌ 错误: 性能问题
    for (const item of items) {
      await i18n.setLocale(item.locale);
    }
-   
+
    // ✅ 正确: 批量处理
    const translations = await i18n.batchTranslate(keys);
    ```
 
 2. **不要忽略错误处理**
+
    ```typescript
    // ❌ 错误: 可能抛异常
    t(userProvidedKey);
-   
+
    // ✅ 正确: 配置 missingKeyHandler
    const engine = new I18nEngine({
      missingKeyHandler: (key) => `[${key}]`,
@@ -994,10 +1061,11 @@ console.log(report.slowQueries);     // 慢查询列表
    ```
 
 3. **不要在生产环境开启 debug 模式**
+
    ```typescript
    // ❌ 错误: 泄露内部信息
    const engine = new I18nEngine({ debug: true });
-   
+
    // ✅ 正确: 仅开发环境
    const engine = new I18nEngine({
      debug: process.env.NODE_ENV === 'development',
@@ -1130,7 +1198,7 @@ export async function getServerSideProps(context) {
   engine = new I18nEngine();
   await engine.init();
   await engine.setLocale(context.locale);
-  
+
   return {
     props: {
       initialLocale: context.locale,
