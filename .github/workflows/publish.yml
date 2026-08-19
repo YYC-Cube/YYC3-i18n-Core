@@ -1,11 +1,13 @@
-# npm 发版工作流 — Trusted Publishing (OIDC)。
-# npm 2026 政策下 token 直接发布对该账户已不可用(本地与 CI 均 403、
-# 无错误正文;认证层已通过),按官方替代通道改用 OIDC:
-#   1. npmjs.com → @yyc3/i18n-core → Settings → Trusted Publishing
-#      绑定 Repository: YYC-Cube/YYC3-i18n-Core, Workflow: publish.yml
-#   2. 本工作流以 id-token: write 出示 OIDC 身份,无需任何 token。
-# 若探针(Publish probe)已成功将版本放上 registry,publish 步骤会
-# 识别"已发布"而不报错。
+# npm 发版工作流 — CI 发版(本地网络对 registry 大上传不可用)。
+# 依赖 repo secret NPM_TOKEN = 细粒度 token(Read and write +
+# All packages + Bypass 2FA)。
+# ⚠️ 排查教训(2026-08-20):对 registry 的连续失败 PUT 会触发
+# Cloudflare 速率熔断(HTML 403 "Attention Required"),表现为无正文
+# 的 E403,且与 token/客户端无关。失败后不要立即重试,等待冷却
+# (~30-60 分钟)再单次重试。
+# 2027-01 npm GAT 政策全面生效后,迁移 Trusted Publishing(OIDC):
+# npmjs.com 包设置绑定本仓库,恢复 permissions.id-token: write +
+# --provenance,去除 NPM_TOKEN。
 name: Publish to npm
 
 on:
@@ -16,7 +18,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm Trusted Publishing 所需
 
 jobs:
   publish:
@@ -37,24 +38,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
-
-      # 诊断探针 v3:文档二分定位 WAF 触发内容
-      # (manifest vs 附件;附件内部分四段替换)
-      - name: Publish probe
-        run: |
-          npm pack --ignore-scripts >/dev/null 2>&1
-          node scripts/probe-publish.mjs
+      # prepublishOnly(clean+build+test)由 npm publish 原生触发
+      - name: Publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish (Trusted Publishing / OIDC)
-        run: |
-          npm publish --access public --provenance || {
-            v=$(npm view @yyc3/i18n-core version 2>/dev/null)
-            if [ "$v" = "2.4.1" ]; then echo "already published by probe"; exit 0; fi
-            echo '--- npm debug log ---'
-            tail -n 80 /home/runner/.npm/_logs/*debug-0.log 2>/dev/null || true
-            exit 1
-          }
