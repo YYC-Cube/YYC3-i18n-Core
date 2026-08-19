@@ -1,12 +1,14 @@
 /**
  * file probe-publish.mjs
- * description 发版诊断探针——以与 npm publish 完全相同的文档结构
- *   (现有 packument + 新版本清单 + base64 tarball 附件)直接 PUT,
- *   打印 registry 的逐字响应。npm 客户端对 403 不显示响应体,此脚本
- *   用于暴露真实拒绝原因;若 registry 放行,版本即完成发布。
+ * description 发版诊断探针 v2——鉴别 Cloudflare WAF 拦截的触发维度:
+ *   1) 尺寸阶梯:不同体积的 PUT 到目标包 URL,定位阈值(若存在);
+ *   2) 外部包对照:同 token PUT 到无关包,鉴别账户级封锁;
+ *   3) 完整捕获 HTML 拦截页的可读文本(含 Ray ID 与规则提示)。
+ *   小体积 junk 期望 registry JSON 400(认证通过、到达应用层);
+ *   HTML 403 = WAF 层拦截。
  * module YYC3-i18n-Core/scripts
  * author YanYuCloudCube Team <admin@0379.email>
- * version 1.0.0
+ * version 2.0.0
  * created 2026-08-20
  * status active
  * tags [diagnostics],[publish]
@@ -16,13 +18,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import crypto from "node:crypto";
 
-const PKG_SCOPE = "@yyc3/i18n-core";
-const REG_URL = "https://registry.npmjs.org/@yyc3%2fi18n-core";
-const CWD = process.cwd();
-
-// token 优先级:NPM_TOKEN / NODE_AUTH_TOKEN(CI)→ ~/.npmrc(本地)
 function readToken() {
   for (const k of ["NPM_TOKEN", "NODE_AUTH_TOKEN"]) {
     if (process.env[k]) return process.env[k];
@@ -36,50 +32,54 @@ function readToken() {
 }
 
 const token = readToken();
-if (!token) {
-  console.log("[probe] no token found — sending unauthenticated PUT (expected 401/403)");
-}
-
-const pkg = JSON.parse(fs.readFileSync(path.join(CWD, "package.json"), "utf8"));
-const tgzName = `${PKG_SCOPE.replace("@", "").replace("/", "-")}-${pkg.version}.tgz`;
-const tgzPath = path.join(CWD, tgzName);
-if (!fs.existsSync(tgzPath)) {
-  console.error(`[probe] tarball not found: ${tgzName} (run npm pack first)`);
-  process.exit(1);
-}
-const tgz = fs.readFileSync(tgzPath);
-const shasum = crypto.createHash("sha1").update(tgz).digest("hex");
-const integrity = "sha512-" + crypto.createHash("sha512").update(tgz).digest("base64");
-
-// 拉取现有 packument,以其最新版本清单为结构模板
-const cur = await fetch(REG_URL).then((r) => r.json());
-const latestVer = cur["dist-tags"].latest;
-const template = cur.versions[latestVer];
-
-const manifest = { ...template, ...pkg };
-delete manifest.scripts;
-delete manifest.devDependencies;
-delete manifest.publishConfig;
-manifest.dist = {
-  integrity,
-  shasum,
-  tarball: `https://registry.npmjs.org/@yyc3/i18n-core/-/i18n-core-${pkg.version}.tgz`,
-};
-
-cur.versions[pkg.version] = manifest;
-cur["dist-tags"].latest = pkg.version;
-cur._attachments = {
-  [tgzName]: { content_type: "application/octet-stream", data: tgz.toString("base64"), length: tgz.length },
-};
-
 const headers = { "Content-Type": "application/json" };
 if (token) headers.Authorization = `Bearer ${token}`;
+headers["User-Agent"] = "npm/12.0.2 node/v22.22.3 linux x64";
 
-const res = await fetch(REG_URL, { method: "PUT", headers, body: JSON.stringify(cur) });
-const body = await res.text();
-console.log(`[probe] PUT ${pkg.version} → status=${res.status}`);
-console.log(`[probe] headers: cf-mitigated=${res.headers.get("cf-mitigated")} content-type=${res.headers.get("content-type")}`);
-console.log(`[probe] body: ${body.slice(0, 600)}`);
-if (res.status >= 200 && res.status < 300) {
-  console.log("[probe] SUCCESS — version published by probe");
+const report = [];
+
+async function put(url, body, label) {
+  const res = await fetch(url, { method: "PUT", headers, body });
+  const text = await res.text();
+  const isHtml = text.trimStart().startsWith("<");
+  let info = "";
+  if (isHtml) {
+    // 抽取拦截页可读文本(标题 + 正文段落 + Ray ID)
+    const title = text.match(/<title>([^<]+)<\/title>/)?.[1] ?? "";
+    const paras = [...text.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/g)]
+      .map((m) => m[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim())
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(" | ");
+    const ray = text.match(/Ray ID:\s*([0-9a-f]+)/i)?.[1] ?? text.match(/cf-ray/i) ? text.match(/Ray ID:\s*([0-9a-f]+)/i)?.[1] ?? "" : "";
+    info = `HTML title="${title}" text="${paras}" ray=${ray}`;
+  } else {
+    info = text.slice(0, 200);
+  }
+  const line = `[${label}] status=${res.status} ct=${res.headers.get("content-type")} :: ${info}`;
+  console.log(line);
+  report.push(line);
 }
+
+const target = "https://registry.npmjs.org/@yyc3%2fi18n-core";
+const foreign = "https://registry.npmjs.org/lodash";
+
+// 1) 基线读
+const g = await fetch(target);
+console.log(`[get-target] status=${g.status}`);
+
+// 2) 小体积 junk(认证层+文档校验层均可达)
+await put(target, JSON.stringify({}), "put-100B");
+
+// 3) 尺寸阶梯
+for (const kb of [10, 50, 100, 150, 210]) {
+  const pad = "x".repeat(kb * 1024);
+  await put(target, JSON.stringify({ pad }), `put-${kb}KB`).catch((e) =>
+    console.log(`[put-${kb}KB] FETCH-ERROR ${e.cause?.code ?? e.message}`)
+  );
+}
+
+// 4) 外部包对照(小体积)
+await put(foreign, JSON.stringify({}), "put-lodash-100B");
+
+console.log("[probe] done");

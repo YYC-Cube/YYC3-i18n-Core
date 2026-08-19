@@ -40,12 +40,10 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # 诊断探针:用与 npm publish 完全相同的文档结构直读 registry 判定。
-      # 若 registry 放行,版本就此发布(publish 步骤会识别并跳过)。
+      # 诊断探针 v2:尺寸阶梯 + 外部包对照 + 拦截页文本,
+      # 鉴别 WAF 拦截维度(尺寸阈值 / 账户封锁 / 内容规则)
       - name: Publish probe
-        run: |
-          npm pack --ignore-scripts >/dev/null 2>&1
-          node scripts/probe-publish.mjs
+        run: node scripts/probe-publish.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
