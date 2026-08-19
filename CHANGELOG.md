@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.1] - 2026-08-19
+
+### ✨ 新增特性
+
+- **browser 子路径入口**:`@yyc3/i18n-core/browser` 浏览器安全入口(engine/plugins/cache/icu/formatter/detector/rtl,自包含单文件 55.9KB,零 Node 内建依赖)。根入口包含 MCP/AI/CLI/安全工具等 Node 能力,浏览器项目直接引根入口会在 Vite 构建中因 `timers/promises`/`crypto`/`path`/`fs` externalization 失败——浏览器端消费方请改用 `/browser` 子路径(首个接入方:YYC3-Administration,见其审计报告 10.1 节)
+
+### 🔧 修复
+
+- **detector 浏览器运行时安全**:`detectFromEnvironment` 裸访问 `process.env?.*`,浏览器无 `process` 全局时抛 `ReferenceError`(可选链只保护 `env` 不保护 `process`)。现以 `typeof process === "undefined"` 守卫,浏览器中自动跳过 env 检测并降级到 navigator/Intl
+- **providers.test.ts mock 泄漏**:`vi.spyOn(globalThis, "fetch")` 跨用例累积调用记录,`mock.calls[0]` 指向早前无 style/context 的请求导致 4 个用例误报失败(自 v2.4.0 起)。逐用例 `vi.restoreAllMocks()` 还原,621 用例全绿(仅测试文件,不影响运行时)
+
+---
+
 ## [2.3.0] - 2026-04-24
 
 ### 🎉 正式发布 (Stable Release — 文档闭环完成)
@@ -151,6 +164,8 @@ See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed migration instructio
 
 | 版本 | 类型 | 发布日期 | 状态 | 说明 |
 |------|------|----------|------|------|
+| **2.4.1** | Patch | 2026-08-19 | ✅ Stable | browser 子路径入口 + detector 浏览器安全修复 |
+| **2.4.0** | Minor | 2026-08-18 | ✅ Stable | AI-Native i18n with MCP Protocol |
 | **2.3.0** | Patch | 2026-04-24 | ✅ Stable | 正式版 — 文档闭环完成 |
 | **2.1.0** | Minor | 2026-04-21 | ✅ Stable | AI/MCP/ICU 大版本更新 |
 | **2.0.0** | Major | 2026-04-14 | ✅ Stable | 架构重构版 (Breaking Changes) |
@@ -170,6 +185,7 @@ See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed migration instructio
 
 ---
 
+[2.4.1]: https://github.com/YYC-Cube/YYC3-i18n-Core/releases/tag/v2.4.1
 [2.3.0]: https://github.com/YanYuCloudCube/Family-PAI/releases/tag/i18n-v2.3.0
 [2.1.0]: https://github.com/YanYuCloudCube/Family-PAI/releases/tag/i18n-v2.1.0
 [2.0.0]: https://github.com/YanYuCloudCube/Family-PAI/releases/tag/i18n-v2.0.0

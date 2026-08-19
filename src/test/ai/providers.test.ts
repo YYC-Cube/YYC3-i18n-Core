@@ -14,11 +14,17 @@
  *
  * brief @yyc3/i18n-core providers.ts 单元测试
  */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OllamaProvider } from "../../lib/ai/ollama-provider.js";
 import { OpenAIProvider } from "../../lib/ai/openai-provider.js";
 import type { AIProviderType } from "../../lib/ai/provider.js";
 import { AIProviderManager } from "../../lib/ai/provider.js";
+
+// fetch spy 跨用例累积会让 mock.calls[0] 指向早前用例的请求,
+// 必须逐用例还原(vi.spyOn 对已 spy 函数返回既有 spy)
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("OpenAI Provider", () => {
   let provider: OpenAIProvider;

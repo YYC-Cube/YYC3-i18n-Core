@@ -72,6 +72,9 @@ export function detectSystemLocale(storedLocale?: string | null): LocaleDetectio
 }
 
 function detectFromEnvironment(): LocaleDetectionResult | null {
+  // 浏览器无 process 全局,裸访问会抛 ReferenceError(可选链只保护 env)
+  if (typeof process === "undefined") return null;
+
   const envVars = [
     process.env?.LANGUAGE,
     process.env?.LANG,
