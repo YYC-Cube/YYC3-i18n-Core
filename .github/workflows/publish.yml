@@ -1,0 +1,43 @@
+# npm 发版工作流 — 从 GitHub 网络执行 publish,
+# 规避本地网络到 registry.npmjs.org 大体积上传被断连的问题
+# (小请求全通、tarball PUT 被掐;2026-08-19 排查结论)。
+# 依赖 repo secret NPM_TOKEN = 细粒度 token(Read and write +
+# All packages + Bypass 2FA)。
+# 2027-01 npm 政策全面生效后,建议迁移 Trusted Publishing(OIDC):
+# npmjs.com 包设置绑定本仓库,workflow 加 permissions.id-token:
+# write + --provenance,即可去除 NPM_TOKEN。
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # prepublishOnly(clean+build+test)由 npm publish 原生触发
+      - name: Publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
