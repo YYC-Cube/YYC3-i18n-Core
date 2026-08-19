@@ -1,13 +1,22 @@
-# npm 发版工作流 — CI 发版(本地网络对 registry 大上传不可用)。
-# 依赖 repo secret NPM_TOKEN = 细粒度 token(Read and write +
-# All packages + Bypass 2FA)。
-# ⚠️ 排查教训(2026-08-20):对 registry 的连续失败 PUT 会触发
-# Cloudflare 速率熔断(HTML 403 "Attention Required"),表现为无正文
-# 的 E403,且与 token/客户端无关。失败后不要立即重试,等待冷却
-# (~30-60 分钟)再单次重试。
-# 2027-01 npm GAT 政策全面生效后,迁移 Trusted Publishing(OIDC):
-# npmjs.com 包设置绑定本仓库,恢复 permissions.id-token: write +
-# --provenance,去除 NPM_TOKEN。
+# npm 发版工作流 — Trusted Publishing (OIDC),零 token。
+#
+# 背景(2026-08-20 排查记录,详见 git log):
+# - 本地网络对 registry.npmjs.org 大体积 PUT 断连(IPv4/IPv6 均然);
+# - token 直接发布在 GitHub CI 亦 403(无正文,Cloudflare HTML 拦截页),
+#   35 分钟冷却后单次重试依旧 → 持久性封锁,疑似多次失败触发的
+#   滥用防护标记;lodash 对照证实账户/token 传输本身健康;
+# - 按 npm 2026 政策的官方替代通道迁移 OIDC,绕开 token 认证维度。
+#
+# 启用前置(一次性,npmjs.com 网页操作):
+#   npmjs.com → 包 @yyc3/i18n-core → Settings(或 Publishing)→
+#   Trusted Publishing → Configure →
+#     Repository owner: YYC-Cube
+#     Repository name: YYC3-i18n-Core
+#     Workflow filename: publish.yml
+#     Environment: (留空)
+#
+# ⚠️ 失败后切勿立即重试——连续失败 PUT 会触发/延长 Cloudflare 熔断,
+#   每次重试都会重新计时。至少间隔数小时。
 name: Publish to npm
 
 on:
@@ -18,6 +27,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write # npm Trusted Publishing (OIDC) 所需
 
 jobs:
   publish:
@@ -35,11 +45,13 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org/
 
+      # OIDC trusted publishing 需要 npm >= 11.5(Node 22 自带 10.x)
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       # prepublishOnly(clean+build+test)由 npm publish 原生触发
       - name: Publish
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
