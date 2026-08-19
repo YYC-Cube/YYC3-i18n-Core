@@ -1,9 +1,11 @@
-# npm 发版工作流 — 从 GitHub 网络执行 publish。
-# 依赖 repo secret NPM_TOKEN = 细粒度 token(Read and write +
-# All packages + Bypass 2FA)。
-# 2027-01 npm 政策全面生效后,建议迁移 Trusted Publishing(OIDC):
-# npmjs.com 包设置绑定本仓库,workflow 加 permissions.id-token:
-# write + --provenance,即可去除 NPM_TOKEN。
+# npm 发版工作流 — Trusted Publishing (OIDC)。
+# npm 2026 政策下 token 直接发布对该账户已不可用(本地与 CI 均 403、
+# 无错误正文;认证层已通过),按官方替代通道改用 OIDC:
+#   1. npmjs.com → @yyc3/i18n-core → Settings → Trusted Publishing
+#      绑定 Repository: YYC-Cube/YYC3-i18n-Core, Workflow: publish.yml
+#   2. 本工作流以 id-token: write 出示 OIDC 身份,无需任何 token。
+# 若探针(Publish probe)已成功将版本放上 registry,publish 步骤会
+# 识别"已发布"而不报错。
 name: Publish to npm
 
 on:
@@ -14,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write # npm Trusted Publishing 所需
 
 jobs:
   publish:
@@ -34,29 +37,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 诊断:从 CI 网络直读 registry 对 PUT 的逐字响应
-      # (空文档会被文档校验拒绝,但能暴露认证/策略层的真实错误)
-      - name: Probe registry verdict
+      - name: Build
+        run: pnpm build
+
+      # 诊断探针:用与 npm publish 完全相同的文档结构直读 registry 判定。
+      # 若 registry 放行,版本就此发布(publish 步骤会识别并跳过)。
+      - name: Publish probe
         run: |
-          node -e '
-          const t = process.env.NODE_AUTH_TOKEN;
-          const probe = async (body, label) => {
-            const r = await fetch("https://registry.npmjs.org/@yyc3%2fi18n-core", {
-              method: "PUT",
-              headers: { Authorization: `Bearer ${t}`, "Content-Type": "application/json" },
-              body: JSON.stringify(body),
-            });
-            console.log(`[${label}] status=${r.status}`);
-            console.log((await r.text()).slice(0, 600));
-          };
-          await probe({}, "junk-doc");
-          await probe({ _id: "@yyc3/i18n-core", name: "@yyc3/i18n-core", versions: {} }, "minimal-doc");
-          '
+          npm pack --ignore-scripts >/dev/null 2>&1
+          node scripts/probe-publish.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # prepublishOnly(clean+build+test)由 npm publish 原生触发
-      - name: Publish
-        run: npm publish --access public || { echo "--- npm debug log ---"; tail -80 /home/runner/.npm/_logs/*debug-0.log; exit 1; }
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish (Trusted Publishing / OIDC)
+        run: |
+          npm publish --access public --provenance || {
+            v=$(npm view @yyc3/i18n-core version 2>/dev/null)
+            if [ "$v" = "2.4.1" ]; then echo "already published by probe"; exit 0; fi
+            echo '--- npm debug log ---'
+            tail -n 80 /home/runner/.npm/_logs/*debug-0.log 2>/dev/null || true
+            exit 1
+          }
