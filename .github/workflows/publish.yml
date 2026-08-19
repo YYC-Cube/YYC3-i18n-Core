@@ -1,6 +1,4 @@
-# npm 发版工作流 — 从 GitHub 网络执行 publish,
-# 规避本地网络到 registry.npmjs.org 大体积上传被断连的问题
-# (小请求全通、tarball PUT 被掐;2026-08-19 排查结论)。
+# npm 发版工作流 — 从 GitHub 网络执行 publish。
 # 依赖 repo secret NPM_TOKEN = 细粒度 token(Read and write +
 # All packages + Bypass 2FA)。
 # 2027-01 npm 政策全面生效后,建议迁移 Trusted Publishing(OIDC):
@@ -36,8 +34,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 诊断:从 CI 网络直读 registry 对 PUT 的逐字响应
+      # (空文档会被文档校验拒绝,但能暴露认证/策略层的真实错误)
+      - name: Probe registry verdict
+        run: |
+          node -e '
+          const t = process.env.NODE_AUTH_TOKEN;
+          const probe = async (body, label) => {
+            const r = await fetch("https://registry.npmjs.org/@yyc3%2fi18n-core", {
+              method: "PUT",
+              headers: { Authorization: `Bearer ${t}`, "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            });
+            console.log(`[${label}] status=${r.status}`);
+            console.log((await r.text()).slice(0, 600));
+          };
+          await probe({}, "junk-doc");
+          await probe({ _id: "@yyc3/i18n-core", name: "@yyc3/i18n-core", versions: {} }, "minimal-doc");
+          '
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       # prepublishOnly(clean+build+test)由 npm publish 原生触发
       - name: Publish
-        run: npm publish --access public
+        run: npm publish --access public || { echo "--- npm debug log ---"; tail -80 /home/runner/.npm/_logs/*debug-0.log; exit 1; }
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
