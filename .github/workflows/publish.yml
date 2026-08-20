@@ -41,13 +41,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Node 24 自带 npm >= 11.5(Trusted Publishing OIDC 最低要求)。
+          # 之前 node 22 + 单独升级 npm 的方案失败:PATH 中旧 npm 优先,
+          # publish 实际跑在 10.9.8 上(无 OIDC 能力)→ ENEEDAUTH。
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org/
-
-      # OIDC trusted publishing 需要 npm >= 11.5(Node 22 自带 10.x)
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -55,9 +54,10 @@ jobs:
       # prepublishOnly(clean+build+test)由 npm publish 原生触发。
       # ⚠️ 某处(仓库/组织配置)会向步骤注入 NODE_AUTH_TOKEN secret,
       # npm 见 token 即优先 token 认证、跳过 OIDC——必须显式清除,
-      # 迫使 npm ≥11.5 走 Trusted Publishing 的 OIDC 交换。
+      # 迫使 npm >=11.5 走 Trusted Publishing 的 OIDC 交换。
       - name: Publish
         run: |
+          node --version && npm --version
           npm config delete //registry.npmjs.org/:_authToken || true
           npm publish --access public --provenance
         env:
