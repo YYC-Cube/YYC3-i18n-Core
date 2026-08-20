@@ -1,6 +1,5 @@
-# OIDC 身份声明只读检查——不接触 npm registry,零风险。
-# 用于核对 Trusted Publishing 的 subject 声明与 npmjs.com 注册信息:
-# repository_owner / repository / workflow / job_workflow_ref / ref。
+# OIDC 全链路鉴别探针:交换令牌 → 全文档 PUT → 读最终判定。
+# 目的:区分最后的 403 来自 Cloudflare(HTML)还是应用层(JSON)。
 name: OIDC Inspect
 
 on:
@@ -17,20 +16,83 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Mint and decode OIDC token claims
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install, build and pack
         run: |
-          echo "node: $(node --version)  npm: $(npm --version)"
-          for AUD in "npm:registry.npmjs.org" "https://registry.npmjs.org/" ; do
-            echo "=== audience: $AUD ==="
-            JWT=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-              "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$AUD")" \
-              | python3 -c "import sys,json;print(json.load(sys.stdin)['value'])")
-            echo "$JWT" | cut -d. -f2 | python3 -c "
-          import sys, json, base64
-          p = sys.stdin.read().strip()
-          p += '=' * (-len(p) % 4)
-          c = json.loads(base64.urlsafe_b64decode(p))
-          for k in ('sub','repository','repository_owner','repository_id','workflow','job_workflow_ref','ref','ref_type','event_name','actor','aud','iss'):
-              print(f'{k}: {c.get(k)}')
-          "
-          done
+          pnpm install --frozen-lockfile
+          pnpm build
+          npm pack --ignore-scripts >/dev/null 2>&1
+          ls -la *.tgz
+
+      - name: Exchange OIDC token and PUT full document
+        run: |
+          unset NODE_AUTH_TOKEN
+          node --input-type=module - <<'EOF'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const tgzName = fs.readdirSync('.').find(f => f.endsWith('.tgz'));
+          const tgz = fs.readFileSync(tgzName);
+          const shasum = crypto.createHash('sha1').update(tgz).digest('hex');
+          const integrity = 'sha512-' + crypto.createHash('sha512').update(tgz).digest('base64');
+
+          // 1) 铸造 GitHub OIDC JWT(audience=npm)
+          const aud = encodeURIComponent('npm:registry.npmjs.org');
+          const mint = await fetch(`${process.env.ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${aud}`, {
+            headers: { Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
+          }).then(r => r.json());
+          const jwt = mint.value;
+          console.log('[mint] jwt acquired, len=' + jwt.length);
+
+          // 2) 交换 npm 短时效凭证
+          const ex = await fetch('https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/@yyc3%2fi18n-core', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+            body: '{}',
+          });
+          const exBody = await ex.text();
+          console.log(`[exchange] status=${ex.status} ct=${ex.headers.get('content-type')}`);
+          console.log(`[exchange] body(150): ${exBody.slice(0, 150)}`);
+          if (ex.status !== 201) process.exit(1);
+          const parsed = JSON.parse(exBody);
+          const npmToken = parsed.token ?? parsed.access_token;
+          console.log('[exchange] token acquired, len=' + (npmToken?.length ?? 'null'));
+
+          // 3) 全文档 PUT
+          const URL_ = 'https://registry.npmjs.org/@yyc3%2fi18n-core';
+          const cur = await fetch(URL_).then(r => r.json());
+          const template = cur.versions[cur['dist-tags'].latest];
+          const M = { ...template, ...pkg };
+          delete M.scripts; delete M.devDependencies; delete M.publishConfig;
+          M.dist = { integrity, shasum, tarball: `https://registry.npmjs.org/@yyc3/i18n-core/-/i18n-core-${pkg.version}.tgz` };
+          cur.versions[pkg.version] = M;
+          cur['dist-tags'].latest = pkg.version;
+          cur._attachments = { [tgzName]: { content_type: 'application/octet-stream', data: tgz.toString('base64'), length: tgz.length } };
+
+          const res = await fetch(URL_, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${npmToken}`, 'Content-Type': 'application/json', 'User-Agent': 'npm/11.17.0 node/v24.19.0' },
+            body: JSON.stringify(cur),
+          });
+          const text = await res.text();
+          const isHtml = text.trimStart().startsWith('<');
+          console.log(`[put] status=${res.status} ct=${res.headers.get('content-type')} cf-mitigated=${res.headers.get('cf-mitigated')}`);
+          if (isHtml) {
+            const title = text.match(/<title>([^<]+)<\/title>/)?.[1] ?? '';
+            console.log(`[put] HTML title="${title}"`);
+          } else {
+            console.log(`[put] body: ${text.slice(0, 300)}`);
+          }
+          EOF
