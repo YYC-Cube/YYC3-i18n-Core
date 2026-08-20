@@ -1,0 +1,36 @@
+# OIDC 身份声明只读检查——不接触 npm registry,零风险。
+# 用于核对 Trusted Publishing 的 subject 声明与 npmjs.com 注册信息:
+# repository_owner / repository / workflow / job_workflow_ref / ref。
+name: OIDC Inspect
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'inspect-*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint and decode OIDC token claims
+        run: |
+          echo "node: $(node --version)  npm: $(npm --version)"
+          for AUD in "npm:registry.npmjs.org" "https://registry.npmjs.org/" ; do
+            echo "=== audience: $AUD ==="
+            JWT=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$AUD")" \
+              | python3 -c "import sys,json;print(json.load(sys.stdin)['value'])")
+            echo "$JWT" | cut -d. -f2 | python3 -c "
+          import sys, json, base64
+          p = sys.stdin.read().strip()
+          p += '=' * (-len(p) % 4)
+          c = json.loads(base64.urlsafe_b64decode(p))
+          for k in ('sub','repository','repository_owner','repository_id','workflow','job_workflow_ref','ref','ref_type','event_name','actor','aud','iss'):
+              print(f'{k}: {c.get(k)}')
+          "
+          done
