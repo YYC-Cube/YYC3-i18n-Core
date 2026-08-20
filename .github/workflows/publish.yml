@@ -58,7 +58,13 @@ jobs:
       - name: Publish
         run: |
           node --version && npm --version
-          npm config delete //registry.npmjs.org/:_authToken || true
-          npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ""
+          # 彻底清除 token 痕迹:unset 注入的 env + 全新干净 npmrc
+          # (npm 检测到任何 auth 配置都会跳过 OIDC 自动登录)
+          unset NODE_AUTH_TOKEN
+          export NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/clean.npmrc"
+          printf 'registry=https://registry.npmjs.org/\n' > "$NPM_CONFIG_USERCONFIG"
+          npm publish --access public --provenance --loglevel=verbose || {
+            echo '--- npm debug logs ---'
+            tail -n 150 /home/runner/.npm/_logs/*debug-0.log 2>/dev/null || true
+            exit 1
+          }
