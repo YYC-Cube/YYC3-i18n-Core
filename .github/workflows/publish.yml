@@ -52,6 +52,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # prepublishOnly(clean+build+test)由 npm publish 原生触发
+      # prepublishOnly(clean+build+test)由 npm publish 原生触发。
+      # ⚠️ 某处(仓库/组织配置)会向步骤注入 NODE_AUTH_TOKEN secret,
+      # npm 见 token 即优先 token 认证、跳过 OIDC——必须显式清除,
+      # 迫使 npm ≥11.5 走 Trusted Publishing 的 OIDC 交换。
       - name: Publish
-        run: npm publish --access public --provenance
+        run: |
+          npm config delete //registry.npmjs.org/:_authToken || true
+          npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ""
