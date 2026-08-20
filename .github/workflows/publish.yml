@@ -1,7 +1,14 @@
 # npm 发版工作流 — Trusted Publishing (OIDC),零 token。
-# 当前状态:exchange 201 成功(凭证有效),但 PUT 403 空体——
-# 本轮以探针复刻 npm 的 PUT 并读取响应 content-type/正文,
-# 区分 Cloudflare(HTML)与应用层(JSON)拒绝。
+#
+# ⚠️ 当前阻塞(2026-08-20 确诊):`PUT /@yyc3/i18n-core` 被 npm 侧
+# Cloudflare WAF 定点拦截("Attention Required" HTML 403)。已排除:
+# 凭证(none/token/合法 OIDC 均拦)、网络(CN 本地/美国 runner)、npm
+# 版本(10.9.8/11.17)、载荷(全文档/最小/哑弹/无 sourcemap)、注册
+# (exchange 201 证实匹配)。唯一出路:npm support 解除,或长时间
+# (24h+)完全静默后单次重试。**失败后绝不连发重试**——失败风暴正是
+# 触发拦截的原因。
+#
+# 恢复发版时:移动 tag v* 到目标提交并推送即触发。
 name: Publish to npm
 
 on:
@@ -26,6 +33,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          # Node 24 自带 npm >= 11.5(OIDC 最低要求)
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org/
@@ -33,69 +41,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build and pack
-        run: |
-          pnpm build
-          # 诊断:剥离 sourcemap(占体积 60% 的 base64 VLQ 串,疑似
-          # WAF 内容规则触发物;库包不带 map 亦为行业常态)
-          find dist -name '*.map' -delete
-          npm pack --ignore-scripts >/dev/null 2>&1
-          ls -la *.tgz
-
-      - name: Publish probe (exchange + full-doc PUT)
+      - name: Publish
         run: |
           unset NODE_AUTH_TOKEN
           export NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/clean.npmrc"
           printf 'registry=https://registry.npmjs.org/\n' > "$NPM_CONFIG_USERCONFIG"
-          node --input-type=module - <<'EOF'
-          import fs from 'node:fs';
-          import crypto from 'node:crypto';
-
-          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          const tgzName = fs.readdirSync('.').find(f => f.endsWith('.tgz'));
-          const tgz = fs.readFileSync(tgzName);
-          const shasum = crypto.createHash('sha1').update(tgz).digest('hex');
-          const integrity = 'sha512-' + crypto.createHash('sha512').update(tgz).digest('base64');
-
-          // 1) 铸造 OIDC JWT 并交换短时效凭证(与 npm 内部流程一致)
-          const aud = encodeURIComponent('npm:registry.npmjs.org');
-          const mint = await fetch(`${process.env.ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${aud}`, {
-            headers: { Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
-          }).then(r => r.json());
-          const ex = await fetch('https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/@yyc3%2fi18n-core', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${mint.value}`, 'Content-Type': 'application/json' },
-            body: '{}',
-          });
-          const exBody = await ex.text();
-          console.log(`[exchange] status=${ex.status}`);
-          if (ex.status !== 201) { console.log(`[exchange] body: ${exBody.slice(0, 300)}`); process.exit(1); }
-          const npmToken = JSON.parse(exBody).token ?? JSON.parse(exBody).access_token;
-          console.log('[exchange] token acquired');
-
-          // 2) 全文档 PUT(与 npm publish 相同结构)
-          const URL_ = 'https://registry.npmjs.org/@yyc3%2fi18n-core';
-          const cur = await fetch(URL_).then(r => r.json());
-          const template = cur.versions[cur['dist-tags'].latest];
-          const M = { ...template, ...pkg };
-          delete M.scripts; delete M.devDependencies; delete M.publishConfig;
-          M.dist = { integrity, shasum, tarball: `https://registry.npmjs.org/@yyc3/i18n-core/-/i18n-core-${pkg.version}.tgz` };
-          cur.versions[pkg.version] = M;
-          cur['dist-tags'].latest = pkg.version;
-          cur._attachments = { [tgzName]: { content_type: 'application/octet-stream', data: tgz.toString('base64'), length: tgz.length } };
-
-          const res = await fetch(URL_, {
-            method: 'PUT',
-            headers: { Authorization: `Bearer ${npmToken}`, 'Content-Type': 'application/json', 'User-Agent': 'npm/11.17.0 node/v24.19.0' },
-            body: JSON.stringify(cur),
-          });
-          const text = await res.text();
-          const isHtml = text.trimStart().startsWith('<');
-          console.log(`[put] status=${res.status} ct=${res.headers.get('content-type')} cf-mitigated=${res.headers.get('cf-mitigated')}`);
-          if (isHtml) {
-            console.log(`[put] HTML title="${text.match(/<title>([^<]+)<\/title>/)?.[1] ?? ''}"`);
-          } else {
-            console.log(`[put] body: ${text.slice(0, 400)}`);
-          }
-          if (res.status >= 200 && res.status < 300) console.log('[put] SUCCESS — published!');
-          EOF
+          npm publish --access public --provenance
