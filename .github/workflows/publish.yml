@@ -36,6 +36,9 @@ jobs:
       - name: Build and pack
         run: |
           pnpm build
+          # 诊断:剥离 sourcemap(占体积 60% 的 base64 VLQ 串,疑似
+          # WAF 内容规则触发物;库包不带 map 亦为行业常态)
+          find dist -name '*.map' -delete
           npm pack --ignore-scripts >/dev/null 2>&1
           ls -la *.tgz
 
