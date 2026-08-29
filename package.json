@@ -1,6 +1,6 @@
 {
   "name": "@yyc3/i18n-core",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "🌐 YYC³ Production-Ready Internationalization (i18n) Framework - High-performance, plugin-based, zero-dependency i18n solution for TypeScript/JavaScript applications",
   "keywords": [
     "i18n",
@@ -76,9 +76,7 @@
   },
   "files": [
     "dist/",
-    "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",

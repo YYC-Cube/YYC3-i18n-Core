@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.2] - 2026-08-26
+
+### 🔧 变更
+
+- **净化版发布**(按 npm Support Ticket 4682575 指引):tarball 仅保留 `dist/` 运行时与 LICENSE;tsup 全面关闭 sourcemap(原 `dist/*.map` 约占体积 60%)。代码内容与 2.4.1 完全相同——2.4.1 因 npm 侧 WAF 对 publish PUT 的定点拦截未能上架,详见 2.4.1 节。
+
+---
+
 ## [2.4.1] - 2026-08-19
 
 ### ✨ 新增特性
@@ -164,7 +172,8 @@ See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed migration instructio
 
 | 版本 | 类型 | 发布日期 | 状态 | 说明 |
 |------|------|----------|------|------|
-| **2.4.1** | Patch | 2026-08-19 | ✅ Stable | browser 子路径入口 + detector 浏览器安全修复 |
+| **2.4.2** | Patch | 2026-08-26 | ✅ Stable | 净化版发布(按 npm Support 指引),内容同 2.4.1 |
+| **2.4.1** | Patch | 2026-08-19 | ⚠️ 未上架 | browser 子路径入口 + detector 浏览器安全修复(被 npm WAF 拦截) |
 | **2.4.0** | Minor | 2026-08-18 | ✅ Stable | AI-Native i18n with MCP Protocol |
 | **2.3.0** | Patch | 2026-04-24 | ✅ Stable | 正式版 — 文档闭环完成 |
 | **2.1.0** | Minor | 2026-04-21 | ✅ Stable | AI/MCP/ICU 大版本更新 |
@@ -185,6 +194,7 @@ See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed migration instructio
 
 ---
 
+[2.4.2]: https://github.com/YYC-Cube/YYC3-i18n-Core/releases/tag/v2.4.2
 [2.4.1]: https://github.com/YYC-Cube/YYC3-i18n-Core/releases/tag/v2.4.1
 [2.3.0]: https://github.com/YanYuCloudCube/Family-PAI/releases/tag/i18n-v2.3.0
 [2.1.0]: https://github.com/YanYuCloudCube/Family-PAI/releases/tag/i18n-v2.1.0
