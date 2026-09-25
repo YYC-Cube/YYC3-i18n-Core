@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pages 部署:CNAME 统一为单一来源 `Public/CNAME`(`i18n.yyc3.vip`,i18n 标准缩写;与 Pages Settings 自定义域名、HTTPS 证书及仓库 homepage 对齐),构建后注入 dist;删除与权威域名冲突的旧 `docs/CNAME`(内含 `docs.yyv3.vip` 误拼);deploy-docs 工作流接入 `actions/configure-pages@v5`,docs 改用自带依赖构建(去除 CI 内 `pnpm add` 的不可复现操作);站点已上线 <https://i18n.yyc3.vip(Enforce> HTTPS)
 - `@vitest/coverage-v8` v4 插桩对分支计数更精确(`??`/`||`/三元分支独立计数),分支覆盖率阈值按新口径 89 → 85 重基线(当前实际 85.25%,statements/functions/lines 仍 >= 90)
 
+### 📖 文档
+
+- **文档站 10 语言真实落地(语言栏 2 → 10)**:`docs/.vitepress/config.ts` 的 `locales` 由 root(zh-CN)+en 两项扩为 10 项——新增 ja/ko/fr/de/es/pt/ru/ar(`lang` 用 BCP-47,pt→`pt-BR`、ar→`ar-SA`),**阿拉伯语 locale 设 `dir: 'rtl'`**,依托 VitePress 1.6 CSS 逻辑属性实现全站 RTL,无需 PostCSS 插件
+- **9 个本地化首页**:补齐 `en/index.md` 与 8 个新语言 `index.md`(home layout,hero text/tagline/双 action + 8 个 feature 全部本地语翻译);修复非英语 frontmatter 中含 `": "` 的未加引号标量导致 YAML 解析失败(MCP/ICU/插件 feature 共 18 处统一双引号包裹)
+- **9 个本地化快速开始页**:新建 ja/ko/fr/de/es/pt/ru/ar 共 8 个 `guide/getting-started.md`,重写既有 en 与 root zh 同页——**旧文档示例使用的 `i18n.init({ defaultLocale })` API 在当前引擎中并不存在**,统一对齐 v2.4.2 真实 API:`@yyc3/i18n-core/browser` 浏览器入口 + `i18n` 单例 + `registerTranslation()` 同步注册 + `await setLocale()` + `t(key, params)` + `subscribe()`;`I18nEngine` 独立实例示例字段对齐真实配置(`locale`/`fallbackLocale`/`cache.{maxSize,ttl}`/`debug`)
+- **ICU 复数示例按各语言真实 CLDR 规则**:日韩仅 `other`;en/fr/de/es/pt 用 `one/other`;俄语 `one/few/many`(1/3/5 三形);阿拉伯语 `zero/one/two/few/many/other`(0/1/2/3/15 五形),以文档实证框架 ICU 编译器的多语言能力
+- **每语言全量 UI 本地化**:nav、sidebar、footer、editLink、lastUpdated、docFooter 上下页、outline 标题、深浅色模式/菜单/返回顶部/语言切换 aria 标签、本地搜索框提示文案均提供 10 语言译文;各语言 og:locale 元信息同步本地化。markdown 容器标签(tip/warning/…)与复制按钮在 VitePress 1.6 中仅支持全局配置、无法按 locale 覆写,容器标题改由各语言页 `::: tip {本地语标题}` 内联提供
+- **修复 config.ts 类型报错(ts 2353)**:初版误将 `markdown` 置于 `locales.root` 及各 locale 条目内,TS 报"markdown 不在 LocaleSpecificConfig 中";另误用不存在的 `markdown.codeCopyButton`(VitePress 1.6.4 类型中无此配置项)。现容器标签上移至合法的顶层 `markdown.container`(root 中文),删除无效的 codeCopyButton,IDE 诊断归零
+- 验证:`pnpm --dir docs build` 零错误;dist 产出 root + 9 语言目录共 10 套页面;`ar/index.html` 实测 `<html lang="ar-SA" dir="rtl">`、其余 9 页 `dir="ltr"`;语言切换菜单 SSR HTML 含全 10 个语言名;hero action 链接解析为各语言自有 `/<locale>/guide/getting-started.html`(均真实存在,无死链)
+
 ---
 
 ## [2.4.2] - 2026-08-26
