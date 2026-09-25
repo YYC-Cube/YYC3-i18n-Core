@@ -11,17 +11,25 @@
 > 高性能、插件化、零依赖的 i18n 解决方案，专为现代 Web 应用设计
 
 <p align="center">
+  <a href="https://github.com/YYC-Cube/YYC3-i18n-Core/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/YYC-Cube/YYC3-i18n-Core/ci.yml?branch=main&style=flat-square&label=CI" alt="CI Status" /></a>
+  <a href="https://github.com/YYC-Cube/YYC3-i18n-Core/actions/workflows/deploy-docs.yml"><img src="https://img.shields.io/github/actions/workflow/status/YYC-Cube/YYC3-i18n-Core/deploy-docs.yml?branch=main&style=flat-square&label=Deploy&logo=githubactions&logoColor=white" alt="Deploy Status" /></a>
+  <a href="https://i18n.yyc3.vip"><img src="https://img.shields.io/website?url=https%3A%2F%2Fi18n.yyc3.vip&style=flat-square&label=%F0%9F%8C%90%20Docs" alt="Documentation Site" /></a>
+  <br/>
   <a href="https://www.npmjs.com/package/@yyc3/i18n-core"><img src="https://img.shields.io/npm/v/@yyc3/i18n-core.svg?style=flat-square&color=blue" alt="npm version" /></a>
   <a href="https://github.com/YYC-Cube/YYC3-i18n-Core/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@yyc3/i18n-core.svg?style=flat-square&color=brightgreen" alt="MIT License" /></a>
+  <img src="https://img.shields.io/node/v/@yyc3/i18n-core.svg?style=flat-square&logo=nodedotjs&logoColor=white&color=339933" alt="Node.js >=18" />
+  <img src="https://img.shields.io/badge/pnpm-11-F9AD00?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm 11" />
   <br/>
   <img src="https://img.shields.io/badge/TypeScript-5.3+-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/node/v/%3E%3D16.0.0.svg?style=flat-square&color=339933" alt="Node.js >=16" />
   <img src="https://img.shields.io/badge/dependencies-0-success?style=flat-square" alt="Zero Dependencies" />
-  <br/>
   <img src="https://img.shields.io/badge/tests-621%20passed-brightgreen?style=flat-square" alt="621 Tests Passed" />
-  <img src="https://img.shields.io/badge/coverage-96.81%25-brightgreen?style=flat-square" alt="96.81% Coverage" />
-  <img src="https://img.shields.io/badge/security-OWASP%20L4-blue?style=flat-square" alt="OWASP Level 4" />
+  <img src="https://img.shields.io/badge/coverage-92.04%25-brightgreen?style=flat-square" alt="92.04% Coverage" />
+  <img src="https://img.shields.io/badge/audit-0%20vulnerabilities-success?style=flat-square&logo=npm" alt="0 Vulnerabilities" />
+  <img src="https://img.shields.io/badge/security-OWASP%20L4-blue?style=flat-square&logo=owasp" alt="OWASP Level 4" />
+  <img src="https://img.shields.io/badge/i18n-10%20languages%20%7C%20RTL-blueviolet?style=flat-square" alt="10 Languages with RTL" />
 </p>
+
+> 徽章数据口径:tests / coverage 取自 CI `test:coverage` 实证(2026-09-26,30 files / 621 tests / 92.04% stmts);audit 为三工作区零漏洞实证。徽章语义与全站图标规范见[「徽章与图标可视化体系」](#-徽章与图标可视化体系)。
 
 ---
 
@@ -63,7 +71,7 @@
 [YYC³-CLI](https://github.com/YYC-Cube/YYC3-CLI) 是 YYC³ 生态的**文档全生命周期生成引擎**（v2.0.0），负责项目初始化、标准化文档生成、DevOps运维。`@yyc3/i18n-core` 与其形成以下协同：
 
 | 协同场景 | CLI 职责 | i18n-core 职责 |
-|---------|---------|---------------|
+| --------- | --------- | --------------- |
 | **项目初始化** | `yyc3 init` 生成项目骨架 | 自动注入 i18n 配置（locales/ + 引擎实例） |
 | **多语言文档** | 生成符合 YYC³ 标准的文档架构 | 为生成的文档提供 10 语言翻译支持 |
 | **AI 赋能** | AI 驱动的文档/代码生成 | AI 翻译引擎（OpenAI + Ollama）复用同一 AI 基础设施 |
@@ -73,7 +81,7 @@
 ### 核心价值主张
 
 | 维度 | 传统 i18n 方案 | @yyc3/i18n-core |
-|------|--------------|-----------------|
+| ------ | -------------- | ----------------- |
 | **AI 翻译** | 需外接 SaaS / 手动翻译 | 原生集成 OpenAI + Ollama 双引擎 |
 | **AI 协作** | 无 AI Agent 接口 | 行业首个 i18n MCP Server（7 个工具） |
 | **依赖链** | 3-10 个运行时依赖 | **零依赖** — 无供应链风险 |
@@ -102,6 +110,7 @@
 - [安全特性](#-安全特性)
 - [常见问题](#-常见问题)
 - [迁移指南](#-迁移指南)
+- [徽章与图标可视化体系](#-徽章与图标可视化体系)
 - [贡献指南](#-贡献指南)
 - [License](#-license)
 
@@ -112,7 +121,7 @@
 ### 🎯 核心优势
 
 | 特性 | 描述 | 状态 |
-|------|------|------|
+| ------ | ------ | ------ |
 | **零依赖运行时** | 无任何生产依赖，纯 TypeScript 实现 | ✅ |
 | **10 种语言内置** | en/zh-CN/zh-TW/ja/ko/fr/de/es/pt-BR/ar(RTL) | ✅ |
 | **AI 翻译集成** | OpenAI + Ollama 本地模型支持 | ✅ |
@@ -126,7 +135,7 @@
 ### 🏆 与主流方案对比
 
 | 特性 | @yyc3/i18n-core | react-i18next | vue-i18n | typesafe-i18n |
-|------|:---:|:---:|:---:|:---:|
+| ------ | :---: | :---: | :---: | :---: |
 | **依赖数量** | **0** | 3+ | 2+ | 0 |
 | **打包大小** | **~15KB** | ~33KB | ~1.5MB | ~1KB |
 | **AI 翻译** | ✅ 内置 | 插件 | 插件 | ❌ |
@@ -197,7 +206,7 @@ await server.start();
 
 ### 前置要求
 
-- **Node.js** >= 16.0.0
+- **Node.js** >= 18.0.0（`package.json` engines 声明，LTS 版本推荐）
 - **TypeScript** >= 5.0 (推荐，但也支持 JavaScript)
 
 ### 安装命令
@@ -249,9 +258,9 @@ import {
   PerformanceTracker,
 } from '@yyc3/i18n-core/plugins';
 
-// 创建引擎实例
+// 创建引擎实例(构造即可用,无 init 步骤)
 const engine = new I18nEngine({
-  defaultLocale: 'en',
+  locale: 'en',            // 初始语言
   fallbackLocale: 'en',
   cache: {
     maxSize: 1000,
@@ -266,8 +275,9 @@ engine.plugins.register(
   new PerformanceTracker({ slowThreshold: 10 }).createPlugin()
 );
 
-// 初始化
-await engine.init();
+// 注册语言资源并激活
+engine.registerTranslation('en', enBundle);
+await engine.setLocale('en');
 
 // 使用
 engine.t('greeting', { name: 'World' }); // "Hello, World!"
@@ -330,7 +340,7 @@ const changeLocale = async (locale: string) => {
 import { I18nEngine } from '@yyc3/i18n-core';
 
 const i18n = new I18nEngine({
-  defaultLocale: 'zh-CN',
+  locale: 'zh-CN',
 });
 
 export function middleware(req, res, next) {
@@ -384,7 +394,7 @@ app.get('/api/hello', (req, res) => {
 ### 模块职责
 
 | 模块 | 文件路径 | 职责 | 复杂度 |
-|------|----------|------|--------|
+| ------ | ---------- | ------ | -------- |
 | **Core Engine** | `lib/engine.ts` | 翻译引擎、语言切换、参数插值 | ⭐⭐⭐ |
 | **Cache System** | `lib/cache.ts` | LRU 缓存、TTL 过期、统计 | ⭐⭐ |
 | **Plugin System** | `lib/plugins.ts` | 生命周期钩子、事件订阅 | ⭐⭐ |
@@ -431,26 +441,26 @@ t('greeting', { name: 'World' }); // "Hello, World!"
 
 // 方式2: 创建独立实例 (推荐复杂场景)
 const engine = new I18nEngine({
-  defaultLocale: 'en',
+  locale: 'en',
   fallbackLocale: 'en',
   debug: false,
 });
 
-await engine.init();
+// 注册语言资源(同步)
+engine.registerTranslation('zh-CN', zhCNBundle);
 
 // 切换语言
 await engine.setLocale('zh-CN');
 
 // 批量翻译
-const results = await engine.batchTranslate(['key1', 'key2', 'key3']);
+const results = engine.batchTranslate(['key1', 'key2', 'key3']);
 
 // 获取统计信息
 const stats = engine.getStats();
-console.log(stats.cacheHits, stats.cacheMisses);
 
 // 订阅语言变更
-engine.onLocaleChange((from, to) => {
-  console.log(`Locale changed: ${from} -> ${to}`);
+const unsubscribe = engine.subscribe((locale) => {
+  console.log(`Locale changed to: ${locale}`);
 });
 ```
 
@@ -458,13 +468,15 @@ engine.onLocaleChange((from, to) => {
 
 ```typescript
 interface I18nEngineConfig {
-  defaultLocale?: string;      // 默认语言: 'en'
-  fallbackLocale?: string;     // 回退语言: 'en'
+  locale?: Locale;             // 初始语言
+  fallbackLocale?: Locale;     // 回退语言
   debug?: boolean;             // 调试模式: false
-  cache?: CacheConfig;         // 缓存配置
-  plugins?: I18nPlugin[];      // 初始插件列表
-  onError?: (error: Error) => void;  // 错误处理
-  missingKeyHandler?: (key: string) => string;  // 缺失键处理
+  cache?: {
+    maxSize?: number;          // 最大缓存条目(默认 1000)
+    ttl?: number;              // 过期时间毫秒(默认 5 分钟)
+  };
+  onError?: (error: Error, context: { key: string; locale: Locale }) => void;
+  missingKeyHandler?: (key: string, locale: Locale) => string;
 }
 ```
 
@@ -502,7 +514,7 @@ cache.delete('key');
 #### 性能指标
 
 | 操作 | 时间复杂度 | 平均耗时 |
-|------|-----------|----------|
+| ------ | ----------- | ---------- |
 | **get()** | O(1) | <0.1ms |
 | **set()** | O(1) | <0.1ms |
 | **批量查找** | O(n) | <1ms (100 keys) |
@@ -552,10 +564,10 @@ i18n.plugins.unregister('analytics-plugin');
 #### 内置插件列表
 
 | 插件名 | 用途 | 配置项 |
-|--------|------|--------|
-| **ConsoleLogger** | 开发调试日志 | 无 |
-| **MissingKeyReporter** | 生产环境缺失键监控 | `reportUrl`, `threshold` |
-| **PerformanceTracker** | 性能指标收集 | `slowThreshold`, `percentiles` |
+| -------- | ------ | -------- |
+| **ConsoleLogger** | 开发调试日志 | `logTranslations`, `logLocaleChanges`, `logMissingKeys`, `logErrors` |
+| **MissingKeyReporter** | 生产环境缺失键监控 | `maxEntries`(记录上限,默认 1000) |
+| **PerformanceTracker** | 性能指标收集 | `slowThreshold`, `maxSlowEntries`, `samplingRate` |
 
 ---
 
@@ -582,7 +594,7 @@ t('items_count', { count: 5 }); // 自动路由到 ICU 编译器
 #### 支持的 ICU 语法
 
 | 语法类型 | 示例 | 说明 |
-|----------|------|------|
+| ---------- | ------ | ------ |
 | **Plural** | `{count, plural, one {...} other {...}}` | 复数规则 |
 | **Select** | `{gender, select, male {...} female {...}}` | 条件选择 |
 | **SelectOrdinal** | `{rank, selectOrdinal, one {...} two {...}}` | 序数词 |
@@ -691,7 +703,7 @@ console.log('MCP Server running...');
 #### MCP 工具详情
 
 | 工具名 | 功能 | 参数 |
-|--------|------|------|
+| -------- | ------ | ------ |
 | `search_translations` | 搜索翻译内容 | query, locale, limit |
 | `add_translation_key` | 添加新翻译键 | key, translations |
 | `translate_key` | 翻译指定键 | key, targetLocale |
@@ -741,7 +753,7 @@ layout.crossAxis;   // 'left'
 #### 支持的 RTL 语言
 
 | 语言 | 代码 | 方向 |
-|------|------|------|
+| ------ | ------ | ------ |
 | 阿拉伯语 | ar | RTL |
 | 希伯来语 | he | RTL |
 | 波斯语 | fa | RTL |
@@ -776,7 +788,7 @@ import { MCPServer, registerI18nTools } from '@yyc3/i18n-core/mcp'
 ### 可用子路径
 
 | 子路径 | 大小估计(gzipped) | 导出内容 | 适用场景 |
-|--------|-------------------|----------|----------|
+| -------- | ------------------- | ---------- | ---------- |
 | `.` | ~15KB | 全部功能 | 小型项目 / 快速原型 |
 | `./cache` | ~3KB | LRU Cache 系统 | 需要高性能缓存 |
 | `./plugins` | ~4KB | 插件管理器 + 内置插件 | 需要扩展功能 |
@@ -878,20 +890,21 @@ t('items', { count: 5 });        // "5 items"
 // 全局单例，无需创建实例
 const i18n: I18nEngine;
 
-// 切换语言
+// 注册语言资源并切换语言
+i18n.registerTranslation('zh-CN', zhCN);
 await i18n.setLocale('zh-CN');
 
 // 获取当前语言
-i18n.currentLocale; // 'zh-CN'
+i18n.getLocale(); // 'zh-CN'
 
 // 批量翻译
-const results = await i18n.batchTranslate(['k1', 'k2', 'k3']);
+const results = i18n.batchTranslate(['k1', 'k2', 'k3']);
 
 // 获取统计
 const stats = i18n.getStats();
 
-// 事件监听
-i18n.onLocaleChange((from, to) => {});
+// 事件监听(返回退订函数)
+const unsubscribe = i18n.subscribe((locale) => {});
 ```
 
 #### `I18nEngine` — 引擎类
@@ -905,12 +918,12 @@ class I18nEngine {
 
   setLocale(locale: string): Promise<void>;
   t(key: string, params?: TranslateParams): string;
-  batchTranslate(keys: string[]): Promise<Record<string, string>>;
+  batchTranslate(keys: string[]): Record<string, string>;
 
-  getTranslations(): TranslationMap;
+  getTranslations(locale: Locale): TranslationMap | undefined;
   getStats(): EngineStats;
 
-  onLocaleChange(callback: (from: string, to: string) => void): () => void;
+  subscribe(callback: (locale: Locale) => void): () => void;
 
   plugins: PluginManager;
 }
@@ -943,7 +956,7 @@ const engine = new I18nEngine({ debug: true });
 window.__i18n_debug__ = {
   engine,
   getCurrentState: () => ({
-    locale: engine.currentLocale,
+    locale: engine.getLocale(),
     cache: engine.cache.getStats(),
     plugins: engine.plugins.list(),
   }),
@@ -959,8 +972,8 @@ console.log(window.__i18n_debug__.getCurrentState());
 import { I18nEngine } from '@yyc3/i18n-core';
 
 // 创建多个独立实例
-const adminI18n = new I18nEngine({ defaultLocale: 'zh-CN' });
-const userI18n = new I18nEngine({ defaultLocale: 'en' });
+const adminI18n = new I18nEngine({ locale: 'zh-CN' });
+const userI18n = new I18nEngine({ locale: 'en' });
 
 // 各自独立运行
 adminI18n.t('dashboard.title'); // 中文
@@ -989,15 +1002,16 @@ import { PerformanceTracker } from '@yyc3/i18n-core/plugins';
 
 const tracker = new PerformanceTracker({
   slowThreshold: 10,  // 慢查询阈值 (ms)
-  percentiles: [50, 90, 95, 99],
-}).createPlugin();
+  maxSlowEntries: 50,
+  samplingRate: 1,    // 生产建议 0.1
+});
 
-i18n.plugins.register(tracker);
+i18n.plugins.register(tracker.createPlugin());
 
-// 获取性能报告
-const report = tracker.getReport();
-console.log(report.percentiles.p95); // 95分位延迟
-console.log(report.slowQueries);     // 慢查询列表
+// 获取性能指标
+tracker.getCacheHitRate();   // 缓存命中率 (0-100)
+tracker.getPercentile(95);   // 95分位延迟 (ms)
+tracker.generateReport();    // 完整性能报告
 ```
 
 ---
@@ -1085,7 +1099,7 @@ console.log(report.slowQueries);     // 慢查询列表
 ### 测试矩阵
 
 | 模块 | 测试文件 | 用例数 | 通过率 | 覆盖率 |
-|------|----------|--------|--------|--------|
+| ------ | ---------- | -------- | -------- | -------- |
 | **Core Engine** | engine-v2.test.ts | 45 | 100% | 94% |
 | **Cache** | (含在 engine tests) | 30 | 100% | 96% |
 | **Plugins** | plugins.test.ts | 25 | 100% | 91% |
@@ -1099,7 +1113,9 @@ console.log(report.slowQueries);     // 慢查询列表
 | **MCP Server** | mcp/server.test.ts, mcp/i18n-tools.test.ts | 40 | 100% | 88% |
 | **Security** | security/*.test.ts | 30 | 100% | 93% |
 | **Infrastructure** | infra/*.test.ts | 30 | 100% | 90% |
-| **总计** | **28 files** | **443** | **✅ 100%** | **92.5%** |
+| **总计** | **30 files** | **621** | **✅ 100%** | **92.04%** |
+
+> 覆盖率为 CI `test:coverage` 语句覆盖率实证(v8 覆盖率,2026-09-26)。
 
 ### 运行测试
 
@@ -1127,7 +1143,7 @@ pnpm test -- -t "should translate with interpolation"
 ### 响应时间 (Node.js 20, M2 Mac)
 
 | 操作 | 平均耗时 | P99 耗时 | QPS |
-|------|----------|----------|-----|
+| ------ | ---------- | ---------- | ----- |
 | **简单翻译 (缓存命中)** | 0.02ms | 0.05ms | 50,000+ |
 | **带参数翻译** | 0.05ms | 0.12ms | 20,000+ |
 | **ICU 复数规则** | 0.15ms | 0.35ms | 6,500+ |
@@ -1138,7 +1154,7 @@ pnpm test -- -t "should translate with interpolation"
 ### 内存占用
 
 | 场景 | 内存占用 | 说明 |
-|------|----------|------|
+| ------ | ---------- | ------ |
 | **空引擎** | ~2MB | 基础开销 |
 | **加载 1 语言** | ~5MB | 含翻译数据 |
 | **加载 10 语言** | ~25MB | 全部内置语言 |
@@ -1152,7 +1168,7 @@ pnpm test -- -t "should translate with interpolation"
 ### OWASP Level 4 安全标准
 
 | 安全维度 | 实现方式 | 状态 |
-|----------|----------|------|
+| ---------- | ---------- | ------ |
 | **ReDoS 防护** | 安全正则编译，超时中断 | ✅ |
 | **时序攻击防护** | 常量时间字符串比较 | ✅ |
 | **路径遍历防护** | 目录逃逸检测与阻止 | ✅ |
@@ -1162,18 +1178,22 @@ pnpm test -- -t "should translate with interpolation"
 ### 安全示例
 
 ```typescript
-import { safeRegexCompile } from '@yyc3/i18n-core/lib/security/safe-regex';
-import { constantTimeStringEqual } from '@yyc3/i18n-core/lib/security/secret-equal';
-import { guardAgainstPathTraversal } from '@yyc3/i18n-core/lib/utils/path-guards';
+// 均从根入口导出(Node.js 环境)
+import {
+  compileSafeRegex,
+  safeEqualSecret,
+  isPathInside,
+} from '@yyc3/i18n-core';
 
 // 安全的正则表达式编译 (防 ReDoS)
-const regex = safeRegexCompile(userInput, { timeout: 1000 });
+const result = compileSafeRegex(/^[a-z]+$/);
+if (!result.safe) throw new Error(result.reason);
 
 // 常量时间比较 (防时序攻击)
-const isEqual = constantTimeStringEqual(tokenA, tokenB);
+const isEqual = safeEqualSecret(tokenA, tokenB);
 
 // 路径遍历防护
-guardAgainstPathTraversal('../../etc/passwd'); // 抛出 SecurityError
+isPathInside(userPath, baseDir); // 越界返回 false
 ```
 
 ---
@@ -1185,11 +1205,12 @@ guardAgainstPathTraversal('../../etc/passwd'); // 抛出 SecurityError
 ```typescript
 import { i18n } from '@yyc3/i18n-core';
 
-// 动态加载翻译
-await i18n.addLocale('custom-LANG', {
+// 注册自定义语言资源
+i18n.registerTranslation('custom-LANG', {
   welcome: '欢迎',
   greeting: '你好，{name}！',
 });
+await i18n.setLocale('custom-LANG');
 ```
 
 ### Q2: 如何在 SSR (服务端渲染) 中使用？
@@ -1198,17 +1219,15 @@ await i18n.addLocale('custom-LANG', {
 // Next.js 示例
 import { I18nEngine } from '@yyc3/i18n-core';
 
-let engine: I18nEngine;
-
 export async function getServerSideProps(context) {
-  engine = new I18nEngine();
-  await engine.init();
+  const engine = new I18nEngine({ locale: context.locale });
+  engine.registerTranslation(context.locale, localeBundle);
   await engine.setLocale(context.locale);
 
   return {
     props: {
       initialLocale: context.locale,
-      translations: engine.getTranslations(),
+      translations: engine.getTranslations(context.locale),
     },
   };
 }
@@ -1268,6 +1287,52 @@ if (result.score > 0.9 && result.issues.length === 0) {
 
 ---
 
+## 🎖️ 徽章与图标可视化体系
+
+> 全仓库文档的可视化语言遵循统一语义：**一个图标/徽章只承载一种含义**，跨 README、docs 文档站与 CHANGELOG 保持一致。
+
+### 徽章体系（四类分层）
+
+| 层级 | 徽章 | 数据源 | 更新机制 |
+| ------ | ------ | -------- | ---------- |
+| **① 构建状态**（动态） | CI · Deploy · Docs 站点 | GitHub Actions / shields website API | 每次推送自动刷新 |
+| **② 发布生态**（动态） | npm version · License · Node engines | npm registry | 发版自动刷新 |
+| **③ 工程质量**（静态锚定） | tests · coverage · audit | CI `test:coverage` 与 `pnpm audit` 实证 | 变更时人工对齐 + 注明取证日期 |
+| **④ 能力标识**（静态） | 零依赖 · OWASP L4 · 10 languages/RTL · TS/pnpm | 架构事实 | 重大版本时复核 |
+
+**维护规则**：静态徽章必须能对应到一条可复现证据（CI 日志 / audit 输出）；证据过期即更新，禁止装饰性数字。
+
+### 章节图标规范（README 与文档站共用）
+
+| 图标 | 语义 | 应用章节 |
+| ------ | ------ | ---------- |
+| 🌐 | 国际化/多语言能力 | 概述、语言特性 |
+| ✨ | 特性总览 | 特性清单 |
+| 📦 | 安装与包管理 | 安装指南、核心模块 |
+| 🚀 | 快速开始/上手 | 快速开始 |
+| 🏗️ | 架构与构建 | 架构设计、构建与 CI |
+| 📖 | 文档与指南 | API 参考、迁移指南 |
+| 🔧 | 高级用法 | 高级功能 |
+| 🧪 | 测试 | 测试覆盖 |
+| ⚡ | 性能 | 性能基准/优化 |
+| 🛡️ | 安全 | 安全特性（OWASP 矩阵） |
+| ❓ | FAQ | 常见问题 |
+| 🎖️ | 可视化规范 | 本章节 |
+| 🤝 | 社区协作 | 贡献指南 |
+| 📄 | 法律 | License |
+
+### CHANGELOG 分类图标
+
+提交与 CHANGELOG 条目使用同一套分类前缀，与 [Keep a Changelog](https://keepachangelog.com) 语义对齐：
+
+`🔒` 安全 · `🔧` 修复 · `🏗️` 构建与 CI · `📖` 文档 · `✨` 新增特性
+
+### 文档站图标架构
+
+文档站（[i18n.yyc3.vip](https://i18n.yyc3.vip)）沿用上述 emoji 语义，并以 **VitePress 侧栏分组 = 图标语义分组** 的映射组织：`指南`（🚀 快速开始 → 🏗️ 进阶）→ `API`（📖 参考）→ `安全`（🛡️）。页面级图标出现在一级标题前缀，导航级图标出现在分组标签，两层不混用。
+
+---
+
 ## 🤝 贡献指南
 
 我们欢迎社区贡献！请遵循以下流程：
@@ -1282,22 +1347,20 @@ if (result.score > 0.9 && result.issues.length === 0) {
 
 ```bash
 # 克隆仓库
-git clone https://github.com/YanYuCloudCube/Family-PAI.git
+git clone git@github.com:YYC-Cube/YYC3-i18n-Core.git
+cd YYC3-i18n-Core
 
-# 安装依赖
+# 安装依赖(pnpm 11,根工作区含 packages/i18n-react)
 pnpm install
 
-# 进入 i18n-core 包目录
-cd packages/i18n-core
-
-# 开发模式
+# 开发模式(核心包构建监听)
 pnpm build:watch
 
 # 运行测试
 pnpm test
 
 # 类型检查
-pnpm lint
+pnpm typecheck
 
 # 格式化代码
 pnpm format
@@ -1314,7 +1377,7 @@ pnpm format
 
 ## 📄 License
 
-MIT © [YYC³ AI Team](https://github.com/YanYuCloudCube/Family-PAI)
+MIT © [YYC³ AI Team](https://github.com/YYC-Cube/YYC3-i18n-Core)
 
 ---
 
@@ -1324,4 +1387,4 @@ MIT © [YYC³ AI Team](https://github.com/YanYuCloudCube/Family-PAI)
 
 ---
 
-*文档版本: 2.3.0 | 最后更新: 2026-04-24*
+*文档版本: 2.4.2 | 最后更新: 2026-09-26*

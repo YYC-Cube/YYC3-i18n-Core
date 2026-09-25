@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔒 安全
 
+- **docs 工作区依赖漏洞清零(audit 4 项:1 high 3 moderate,Dependabot 同源 4 告警)**:vite 5.4.21 已 EOL,修复仅存在于 6.4.3+(GHSA-fx2h-pf6j-xcff high / GHSA-v6wh-96g9-6wx3 / GHSA-4w7w-66w2-5vf9),esbuild<=0.24.2(GHSA-67mh-4wv8-2f99)由 vite 6.4.x 传递依赖 esbuild ^0.25 一并消除;经 `docs/pnpm-workspace.yaml` override `vite: ^6.4.3` 重生成锁文件(vite 6.4.3 发布于 2026-06-01,24h 冷却合规;vitepress 1.6 peer 支持 `^5.4.0 || ^6`),实测 `pnpm audit` → No known vulnerabilities;根工作区与 examples 复扫均为零漏洞
 - **依赖漏洞清零(9 个已公告)`pnpm audit` 全绿**:brace-expansion DoS ×6(指数级展开/无界长度/无界中间数组)、vitest 与 @vitest/mocker 路径穿越任意文件读取、esbuild dev server 任意文件读取(Windows)。经 `pnpm-workspace.yaml` `overrides` 分 major 锁定:brace-expansion `<2 → >=1.1.18`、`>=2 → >=5.0.12`,esbuild `>=0.28.1`;vitest 与 @vitest/coverage-v8 升级至 `^4.1.11`(顺带修正 coverage-v8 1.x 对 vitest 4.x 的版本错配)
 - **examples/vite-react-zh-cn Dependabot 告警清零(6 个)**:browserslist `>=4.28.7`、nanoid `>=3.3.12`、postcss `>=8.5.23`、baseline-browser-mapping `>=2.11.0`、@babel/core `>=7.29.1`;示例工程新增独立 `pnpm-workspace.yaml` 承载 overrides(pnpm v11 配置入口)
 
@@ -34,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📖 文档
 
+- **README 徽章体系重建 + 图标可视化体系规范**:徽章四类分层(① 构建状态动态:CI/Deploy/Docs 站点;② 发布生态动态:npm/License/Node engines;③ 工程质量静态锚定:tests/coverage/audit;④ 能力标识静态:零依赖/OWASP L4/10 语言 RTL),静态徽章强制"可复现证据"维护规则并注明取证日期;修正 3 处失真——Node 徽章损坏 URL(`node/v/%3E%3D16.0.0` 非合法端点,改 registry 动态徽章)、coverage 虚高 96.81% → CI 实证 92.04%(30 files/621 tests/stmts,2026-09-26)、Node >=16 → engines 真实声明 >=18;新增「徽章与图标可视化体系」章节:章节 emoji 语义表(README 与文档站共用)、CHANGELOG 分类图标对齐 Keep a Changelog、文档站"侧栏分组=图标语义分组"两层架构
+- **README 开发者文档 API 事实修正(对齐 v2.4.2 真实导出)**:清除不存在的 `engine.init()`/`defaultLocale` → `locale` 配置(6 处示例+接口定义)、`i18n.currentLocale` → `getLocale()`、引擎 `onLocaleChange(cb)` → `subscribe(cb)`(插件钩子 `onLocaleChange(from,to)` 保留,二者不同层)、`await batchTranslate` → 同步、`getTranslations()` → `getTranslations(locale)`、不存在的 `i18n.addLocale` → `registerTranslation`+`setLocale`;安全示例导入从不存在的子路径 `lib/security/*` 改为根入口真实导出 `compileSafeRegex`/`safeEqualSecret`/`isPathInside`;PerformanceTracker 配置项对齐(`percentiles`/`getReport()` → `maxSlowEntries`/`samplingRate`/`getPercentile()`);插件配置表对齐真实字段(`reportUrl,threshold` → `maxEntries`);协作信息纠偏:克隆/License 链接 Family-PAI → YYC-Cube/YYC3-i18n-Core、删除不存在的 `packages/i18n-core` 目录指引(核心包在仓库根)、`pnpm lint` 类型检查职责 → `pnpm typecheck`;测试矩阵对齐 CI 实证(28 files/443 cases/92.5% → 30 files/621/92.04%)
 - **文档站 10 语言真实落地(语言栏 2 → 10)**:`docs/.vitepress/config.ts` 的 `locales` 由 root(zh-CN)+en 两项扩为 10 项——新增 ja/ko/fr/de/es/pt/ru/ar(`lang` 用 BCP-47,pt→`pt-BR`、ar→`ar-SA`),**阿拉伯语 locale 设 `dir: 'rtl'`**,依托 VitePress 1.6 CSS 逻辑属性实现全站 RTL,无需 PostCSS 插件
 - **9 个本地化首页**:补齐 `en/index.md` 与 8 个新语言 `index.md`(home layout,hero text/tagline/双 action + 8 个 feature 全部本地语翻译);修复非英语 frontmatter 中含 `": "` 的未加引号标量导致 YAML 解析失败(MCP/ICU/插件 feature 共 18 处统一双引号包裹)
 - **9 个本地化快速开始页**:新建 ja/ko/fr/de/es/pt/ru/ar 共 8 个 `guide/getting-started.md`,重写既有 en 与 root zh 同页——**旧文档示例使用的 `i18n.init({ defaultLocale })` API 在当前引擎中并不存在**,统一对齐 v2.4.2 真实 API:`@yyc3/i18n-core/browser` 浏览器入口 + `i18n` 单例 + `registerTranslation()` 同步注册 + `await setLocale()` + `t(key, params)` + `subscribe()`;`I18nEngine` 独立实例示例字段对齐真实配置(`locale`/`fallbackLocale`/`cache.{maxSize,ttl}`/`debug`)

@@ -10,3 +10,9 @@ overrides:
   # 传递链 vitepress → @vue/devtools-kit → superjson@^4 → copy-anything;
   # 钉到 7 天前的 4.1.1(满足 superjson 的 ^4),4.1.2 冷却期满后可移除此覆盖
   copy-anything: "4.1.1"
+  # 安全修复:audit 报 4 项(1 high 3 moderate)均在 vite/esbuild 链路——
+  # vite 5.4.21 已 EOL 且修复仅存在于 6.4.3+(GHSA-fx2h-pf6j-xcff high /
+  # GHSA-v6wh-96g9-6wx3 / GHSA-4w7w-66w2-5vf9),esbuild<=0.24.2(GHSA-67mh-4wv8-2f99)
+  # 由 vite 6.4.x 传递依赖 esbuild ^0.25 一并消除;
+  # vitepress 1.6 peer 支持 ^5.4.0 || ^6,6.4.3 发布于 2026-06-01 冷却合规
+  vite: ^6.4.3
