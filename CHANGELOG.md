@@ -19,14 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **lint 零警告闭环**:消除 13 处 `@typescript-eslint/no-non-null-assertion`——索引访问冗余断言直接移除(项目未开 `noUncheckedIndexedAccess`);`Map.has + get!` 三处(safe-regex/console-logger/missing-key-reporter)重构为 `get` + 判空;`filter(Boolean)` 改为类型谓词 `(v): v is string`;另消除 1 处未使用 catch 绑定(改可选 catch 绑定)
 - **backoff 潜在 `throw undefined`**:`createRetryRunner` 在 `maxAttempts=0` 时 `throw lastError!` 实际抛出 undefined,现回退为显式 `Error`
 - **examples/vite-react-zh-cn 存量缺陷修复**:`@yyc3/i18n-core` 依赖路径 `file:..` 误指 `examples/` 目录,修正为 `file:../..`;示例代码从已移除的旧 API(`initI18n`/`addTranslations`/`setLocale`)迁移至当前 API(`i18n` 单例 + `registerTranslation`);浏览器端导入按 2.4.1 指引切换到 `/browser` 子路径(根入口含 Node 内建模块,Vite 打包必失败),示例构建恢复通过(55.16 kB gzipped)
+- **extract-skills-keys 脚本不可运行修复(根包 `"type": "module"`)**:`.js` 扩展名被按 ESM 解析而文件为 CJS,`require is not defined`(脚本自提交以来从未可运行)——按 Node 官方报错指引重命名为 `extract-skills-keys.cjs`;修复 `fs = require('fs').promises` 下误调 `fs.readFileSync` 的运行时必崩缺陷(改 `await fs.readFile`,`genSkillKeys` async 化,main 调用点同步 await);清理 4 个未使用声明(`crypto`/`AGENTS_HUB`/`hub`/`dirName`);端到端验证通过(65 键:agent 32/cli 16/docs 10/brand 7)
+- **IDE 诊断契约修复**:`eslint.config.js` 全局 `parserOptions.project` 指向仅含 `src/` 的根 tsconfig,IDE 打开独立子工程文件即报 "TSConfig does not include this file"——ignores 补 `examples/**`(自带 tsconfig 的独立 Vite 工程)与 `scripts/**`(CJS 工具脚本),App.tsx/i18n.ts/脚本 3 个解析错误清零
+- **CHANGELOG 结构修复**:补回上一轮误删的 `## [2.4.2]` 分节标题(其"净化版发布"正文一度挂在 Unreleased 下)
 
 ### 🏗️ 构建与 CI
 
+- 示例工程 `tsconfig.json` 移除已弃用的 `baseUrl`(TS 7.0 将停止支持);`moduleResolution: "bundler"` 下 `paths` 相对 tsconfig 目录解析,映射行为不变,弃用错误清零
 - CI 新增 `pnpm audit --audit-level=moderate` 安全门禁;lint 收紧为 `--max-warnings 0`(去除 `|| true` 假绿);`test` 切换为 `test:coverage`(覆盖率门禁真实生效);构建覆盖 workspace 全包(`pnpm -r build`,补上 i18n-react 从未入 CI 的缺口);显式最小权限与超时
 - Pages 部署:CNAME 统一为单一来源 `Public/CNAME`(`i18.yyc3.vip`),构建后注入 dist;删除失效且含误拼域名(`docs.yyv3.vip`)的 `docs/CNAME`;deploy-docs 工作流接入 `actions/configure-pages@v5`,docs 改用自带依赖构建(去除 CI 内 `pnpm add` 的不可复现操作)
 - `@vitest/coverage-v8` v4 插桩对分支计数更精确(`??`/`||`/三元分支独立计数),分支覆盖率阈值按新口径 89 → 85 重基线(当前实际 85.25%,statements/functions/lines 仍 >= 90)
 
 ---
+
+## [2.4.2] - 2026-08-26
 
 ### 🔧 变更
 
