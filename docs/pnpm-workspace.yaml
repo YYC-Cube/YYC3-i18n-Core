@@ -4,3 +4,9 @@ packages: []
 
 allowBuilds:
   esbuild: true
+
+overrides:
+  # 供应链 24h 冷却策略:copy-anything@4.1.2 发布于 2026-09-25(锁文件生成当天),
+  # 传递链 vitepress → @vue/devtools-kit → superjson@^4 → copy-anything;
+  # 钉到 7 天前的 4.1.1(满足 superjson 的 ^4),4.1.2 冷却期满后可移除此覆盖
+  copy-anything: "4.1.1"
