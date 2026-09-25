@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **VitePress 文档站独立工作区化**:docs 此前无独立锁文件,CI 在 `docs/` 下 frozen 安装时 pnpm 向上探测到根 workspace 却不含 docs importer;新增 `docs/pnpm-workspace.yaml`(标记独立工作区 + esbuild 构建白名单)与 `docs/pnpm-lock.yaml`;docs/package.json 补 `"type": "module"`(VitePress 为 ESM-only,缺该字段被 CJS require 加载必失败);配置 `ignoreDeadLinks: true` 解除 25 个规划中未落地页面链接对构建的阻断(已在配置中标注待补页面清单,补齐后移除);`copy-anything` 钉版 4.1.1——4.1.2 发布于锁文件生成当天触发 pnpm 11 供应链 24h 冷却策略(传递链 vitepress → @vue/devtools-kit → superjson → copy-anything),4.1.1 已过冷却期且满足 `^4`,冷却期满后可移除覆盖
 - 示例工程 `tsconfig.json` 移除已弃用的 `baseUrl`(TS 7.0 将停止支持);`moduleResolution: "bundler"` 下 `paths` 相对 tsconfig 目录解析,映射行为不变,弃用错误清零
 - CI 新增 `pnpm audit --audit-level=moderate` 安全门禁;lint 收紧为 `--max-warnings 0`(去除 `|| true` 假绿);`test` 切换为 `test:coverage`(覆盖率门禁真实生效);构建覆盖 workspace 全包(`pnpm -r build`,补上 i18n-react 从未入 CI 的缺口);显式最小权限与超时
-- Pages 部署:CNAME 统一为单一来源 `Public/CNAME`(`i18.yyc3.vip`),构建后注入 dist;删除失效且含误拼域名(`docs.yyv3.vip`)的 `docs/CNAME`;deploy-docs 工作流接入 `actions/configure-pages@v5`,docs 改用自带依赖构建(去除 CI 内 `pnpm add` 的不可复现操作)
+- Pages 部署:CNAME 统一为单一来源 `Public/CNAME`(`i18n.yyc3.vip`,i18n 标准缩写;与 Pages Settings 自定义域名、HTTPS 证书及仓库 homepage 对齐),构建后注入 dist;删除与权威域名冲突的旧 `docs/CNAME`(内含 `docs.yyv3.vip` 误拼);deploy-docs 工作流接入 `actions/configure-pages@v5`,docs 改用自带依赖构建(去除 CI 内 `pnpm add` 的不可复现操作);站点已上线 <https://i18n.yyc3.vip(Enforce> HTTPS)
 - `@vitest/coverage-v8` v4 插桩对分支计数更精确(`??`/`||`/三元分支独立计数),分支覆盖率阈值按新口径 89 → 85 重基线(当前实际 85.25%,statements/functions/lines 仍 >= 90)
 
 ---
