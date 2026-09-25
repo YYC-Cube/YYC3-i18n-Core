@@ -243,6 +243,11 @@ export default defineConfig({
   title: '@yyc3/i18n-core',
   description: '生产级国际化框架 · 中文原生优化 · AI-Powered · MCP Integration',
 
+  // 无扩展名 URL(cleanUrls)。GitHub Pages 原生支持 /foo → foo.html 的
+  // 无扩展名解析,存量 .html 链接仍直接可用,无需 404/重定向迁移;
+  // 注意目录式尾斜杠 /foo/ 不在支持范围(原本亦不支持)。
+  cleanUrls: true,
+
   // markdown 配置为全局级(LocaleSpecificConfig 不接受该字段)。
   // root 为中文站;非中文页面的容器标题通过 `::: tip {title}` 内联本地化。
   // 注: VitePress 1.6 无 codeCopyButton 配置项,复制按钮文案不可配置。
