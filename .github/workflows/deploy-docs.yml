@@ -3,7 +3,7 @@ name: Deploy VitePress to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ['docs/**', 'Public/CNAME', '.github/workflows/deploy-docs.yml']
+    paths: ["docs/**", "Public/CNAME", ".github/workflows/deploy-docs.yml"]
   workflow_dispatch:
 
 permissions:
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 22
   PNPM_VERSION: 11.10.0
 
 jobs:

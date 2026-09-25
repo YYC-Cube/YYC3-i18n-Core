@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🏗️ 构建与 CI
 
-- **修复 CI `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`(pnpm 版本单一事实源)**:根锁文件由 pnpm 11 生成并记录 `pnpm-workspace.yaml` 的 `overrides`,而四个工作流固定 pnpm 9——v9 不从 workspace 文件读取 overrides,判定与锁文件不一致直接拒绝 frozen 安装。现统一:package.json 增加 `packageManager: pnpm@11.10.0`,ci/deploy-docs/publish/oidc-inspect 全部升级到 `11.10.0`
+- **修复 CI `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`(pnpm 版本单一事实源)**:根锁文件由 pnpm 11 生成并记录 `pnpm-workspace.yaml` 的 `overrides`,而四个工作流固定 pnpm 9——v9 不从 workspace 文件读取 overrides,判定与锁文件不一致直接拒绝 frozen 安装。现统一:package.json 增加 `packageManager: pnpm@11.10.0`,ci/deploy-docs/publish/oidc-inspect 全部升级到 `11.10.0`;ci/deploy-docs 的 Node 同步升至 22 LTS(pnpm 11 要求 Node ≥22.13,依赖 `node:sqlite`;publish/oidc 已是 Node 24)
 - **VitePress 文档站独立工作区化**:docs 此前无独立锁文件,CI 在 `docs/` 下 frozen 安装时 pnpm 向上探测到根 workspace 却不含 docs importer;新增 `docs/pnpm-workspace.yaml`(标记独立工作区 + esbuild 构建白名单)与 `docs/pnpm-lock.yaml`;docs/package.json 补 `"type": "module"`(VitePress 为 ESM-only,缺该字段被 CJS require 加载必失败);配置 `ignoreDeadLinks: true` 解除 25 个规划中未落地页面链接对构建的阻断(已在配置中标注待补页面清单,补齐后移除)
 - 示例工程 `tsconfig.json` 移除已弃用的 `baseUrl`(TS 7.0 将停止支持);`moduleResolution: "bundler"` 下 `paths` 相对 tsconfig 目录解析,映射行为不变,弃用错误清零
 - CI 新增 `pnpm audit --audit-level=moderate` 安全门禁;lint 收紧为 `--max-warnings 0`(去除 `|| true` 假绿);`test` 切换为 `test:coverage`(覆盖率门禁真实生效);构建覆盖 workspace 全包(`pnpm -r build`,补上 i18n-react 从未入 CI 的缺口);显式最小权限与超时
