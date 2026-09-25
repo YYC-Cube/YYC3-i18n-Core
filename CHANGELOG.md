@@ -12,11 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🔒 安全
 
 - **依赖漏洞清零(9 个已公告)`pnpm audit` 全绿**:brace-expansion DoS ×6(指数级展开/无界长度/无界中间数组)、vitest 与 @vitest/mocker 路径穿越任意文件读取、esbuild dev server 任意文件读取(Windows)。经 `pnpm-workspace.yaml` `overrides` 分 major 锁定:brace-expansion `<2 → >=1.1.18`、`>=2 → >=5.0.12`,esbuild `>=0.28.1`;vitest 与 @vitest/coverage-v8 升级至 `^4.1.11`(顺带修正 coverage-v8 1.x 对 vitest 4.x 的版本错配)
+- **examples/vite-react-zh-cn Dependabot 告警清零(6 个)**:browserslist `>=4.28.7`、nanoid `>=3.3.12`、postcss `>=8.5.23`、baseline-browser-mapping `>=2.11.0`、@babel/core `>=7.29.1`;示例工程新增独立 `pnpm-workspace.yaml` 承载 overrides(pnpm v11 配置入口)
 
 ### 🔧 修复
 
 - **lint 零警告闭环**:消除 13 处 `@typescript-eslint/no-non-null-assertion`——索引访问冗余断言直接移除(项目未开 `noUncheckedIndexedAccess`);`Map.has + get!` 三处(safe-regex/console-logger/missing-key-reporter)重构为 `get` + 判空;`filter(Boolean)` 改为类型谓词 `(v): v is string`;另消除 1 处未使用 catch 绑定(改可选 catch 绑定)
 - **backoff 潜在 `throw undefined`**:`createRetryRunner` 在 `maxAttempts=0` 时 `throw lastError!` 实际抛出 undefined,现回退为显式 `Error`
+- **examples/vite-react-zh-cn 存量缺陷修复**:`@yyc3/i18n-core` 依赖路径 `file:..` 误指 `examples/` 目录,修正为 `file:../..`;示例代码从已移除的旧 API(`initI18n`/`addTranslations`/`setLocale`)迁移至当前 API(`i18n` 单例 + `registerTranslation`);浏览器端导入按 2.4.1 指引切换到 `/browser` 子路径(根入口含 Node 内建模块,Vite 打包必失败),示例构建恢复通过(55.16 kB gzipped)
 
 ### 🏗️ 构建与 CI
 
