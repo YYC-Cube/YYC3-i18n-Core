@@ -81,8 +81,8 @@ t('place', { n: '4' }); // => "4th place"
 ```ts
 import { ICUParser, ICUCompiler } from '@yyc3/i18n-core/browser';
 
-// 解析：AST + 错误列表
-const parsed = ICUParser.parse('{count, plural, one {# item} other {# items}}');
+// 解析：AST + 错误列表（parse 为实例方法）
+const parsed = new ICUParser().parse('{count, plural, one {# item} other {# items}}');
 if (parsed.errors.length === 0) {
   // 编译：AST + 参数 → 字符串
   const compiler = new ICUCompiler();

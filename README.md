@@ -29,11 +29,11 @@
   <img src="https://img.shields.io/badge/i18n-10%20languages%20%7C%20RTL-blueviolet?style=flat-square" alt="10 Languages with RTL" />
 </p>
 
-> 徽章数据口径:tests / coverage 取自 CI `test:coverage` 实证(2026-09-26,30 files / 621 tests / 92.04% stmts);audit 为三工作区零漏洞实证。徽章语义与全站图标规范见[「徽章与图标可视化体系」](#-徽章与图标可视化体系)。
+> 徽章数据口径：tests / coverage 取自 CI `test:coverage` 实证（2026-09-26，30 files / 621 tests / 92.04% stmts）；audit 为三工作区零漏洞实证。徽章语义与全站图标规范见[「徽章与图标可视化体系」](#-徽章与图标可视化体系)。
 
 ---
 
-## 概述
+## 🌐 概述
 
 **@yyc3/i18n-core** 是 YYC³（YanYuCloudCube）智能应用链中的**国际化基础设施层**，为整个生态提供多语言、AI翻译、MCP协议集成能力。它不仅是一个独立的 i18n 框架，更是 YYC³ 生态「五高五标五化五维」核心理念在国际化领域的具体落地。
 
@@ -92,7 +92,7 @@
 
 ---
 
-## �� 目录
+## 📑 目录
 
 - [概述](#-概述)
 - [特性概览](#-特性概览)
@@ -258,7 +258,7 @@ import {
   PerformanceTracker,
 } from '@yyc3/i18n-core/plugins';
 
-// 创建引擎实例(构造即可用,无 init 步骤)
+// 创建引擎实例（构造即可用，无 init 步骤）
 const engine = new I18nEngine({
   locale: 'en',            // 初始语言
   fallbackLocale: 'en',
@@ -343,11 +343,11 @@ const i18n = new I18nEngine({
   locale: 'zh-CN',
 });
 
-export function middleware(req, res, next) {
+export async function middleware(req, res, next) {
   const locale = req.headers['accept-language']?.split(',')[0] || 'zh-CN';
-  i18n.setLocale(locale);
+  await i18n.setLocale(locale);
 
-  req.t = (key, params?) => i18n.t(key, params);
+  req.t = (key: string, params?: Record<string, string>) => i18n.t(key, params);
   next();
 }
 
@@ -356,6 +356,8 @@ app.get('/api/hello', (req, res) => {
   res.json({ message: req.t('hello') });
 });
 ```
+
+> ⚠️ **并发隔离**：`setLocale` 切换的是实例级全局状态。上述单例模式在多语言并发请求下会互相串语言，生产环境请为每个请求创建独立引擎实例，或使用 `AsyncLocalStorage` 按请求隔离。
 
 ---
 
@@ -446,7 +448,7 @@ const engine = new I18nEngine({
   debug: false,
 });
 
-// 注册语言资源(同步)
+// 注册语言资源（同步）
 engine.registerTranslation('zh-CN', zhCNBundle);
 
 // 切换语言
@@ -571,24 +573,25 @@ i18n.plugins.unregister('analytics-plugin');
 
 ---
 
-### 4. ICU MessageFormat (`@yyc3/i18n-core/icu`)
+### 4. ICU MessageFormat (`@yyc3/i18n-core/browser`)
 
 完整的 ICU MessageFormat 实现，支持复数、选择等复杂语法。
 
 ```typescript
-import { ICUParser, ICUCompiler } from '@yyc3/i18n-core/icu';
+import { ICUParser, ICUCompiler } from '@yyc3/i18n-core/browser';
 
-// 解析 ICU 语法
-const parser = new ICUParser();
-const ast = parser.parse('{count, plural, one {# item} other {# items}}');
+// 解析 ICU 语法（parse 为实例方法，返回 { ast, errors }）
+const parsed = new ICUParser().parse('{count, plural, one {# item} other {# items}}');
 
-// 编译并渲染
-const compiler = new ICUCompiler({ locale: 'en' });
-const result = compiler.compile(ast, { count: 5 });
+// 编译并渲染（locale 与参数在 compile 上下文中传入）
+const result = new ICUCompiler().compile(parsed.ast, {
+  locale: 'en',
+  params: { count: '5' },
+});
 console.log(result); // "5 items"
 
-// 在引擎中直接使用 (自动检测 ICU 语法)
-t('items_count', { count: 5 }); // 自动路由到 ICU 编译器
+// 在引擎中直接使用（自动检测 ICU 语法，参数值为字符串）
+t('items_count', { count: '5' }); // 自动路由到 ICU 编译器
 ```
 
 #### 支持的 ICU 语法
@@ -776,7 +779,7 @@ import { LRUCache } from '@yyc3/i18n-core/cache'
 import { PluginManager, createConsoleLogger } from '@yyc3/i18n-core/plugins'
 
 // 仅 ICU 引擎 (~5KB gzipped)
-import { ICUParser, ICUCompiler } from '@yyc3/i18n-core/icu'
+import { ICUParser, ICUCompiler } from '@yyc3/i18n-core/browser'
 
 // 仅 AI 翻译 (~4KB gzipped)
 import { AIProviderManager, OpenAIProvider } from '@yyc3/i18n-core/ai'
@@ -855,7 +858,7 @@ import { LRUCache } from '@yyc3/i18n-core/cache'
 import { PluginManager, createConsoleLogger } from '@yyc3/i18n-core/plugins'
 
 // ICU
-import { ICUParser, ICUCompiler } from '@yyc3/i18n-core/icu'
+import { ICUParser, ICUCompiler } from '@yyc3/i18n-core/browser'
 
 // AI
 import { AIProviderManager, OpenAIProvider, QualityEstimator } from '@yyc3/i18n-core/ai'
@@ -880,8 +883,8 @@ t('greeting', { name: 'World' }); // "Hello, World!"
 // 嵌套对象
 t('user.profile.name');          // 从嵌套对象获取
 
-// ICU 语法 (自动检测)
-t('items', { count: 5 });        // "5 items"
+// ICU 语法（自动检测，参数值为字符串）
+t('items', { count: '5' });      // "5 items"
 ```
 
 #### `i18n` — 全局单例
@@ -903,7 +906,7 @@ const results = i18n.batchTranslate(['k1', 'k2', 'k3']);
 // 获取统计
 const stats = i18n.getStats();
 
-// 事件监听(返回退订函数)
+// 事件监听（返回退订函数）
 const unsubscribe = i18n.subscribe((locale) => {});
 ```
 
@@ -913,19 +916,30 @@ const unsubscribe = i18n.subscribe((locale) => {});
 class I18nEngine {
   constructor(config?: I18nEngineConfig);
 
-  init(): Promise<void>;
-  destroy(): Promise<void>;
-
+  // 语言管理
+  getLocale(): Locale;
   setLocale(locale: string): Promise<void>;
+  registerTranslation(locale: Locale, map: TranslationMap): void;
+  getTranslations(locale: Locale): TranslationMap | undefined;
+
+  // 翻译
   t(key: string, params?: TranslateParams): string;
   batchTranslate(keys: string[]): Record<string, string>;
+  createNamespace(prefix: string): {
+    t(key: string, params?: Record<string, string>): string;
+    batchTranslate(keys: string[]): Record<string, string>;
+    getLocale(): Locale;
+  };
 
-  getTranslations(locale: Locale): TranslationMap | undefined;
-  getStats(): EngineStats;
-
+  // 事件与运维
   subscribe(callback: (locale: Locale) => void): () => void;
+  setDebug(enabled: boolean): void;
+  getStats(): EngineStats;
+  destroy(): Promise<void>;
 
-  plugins: PluginManager;
+  // 子系统（只读）
+  readonly cache: LRUCache<string>;
+  readonly plugins: PluginManager;
 }
 ```
 
@@ -936,15 +950,15 @@ class I18nEngine {
 ### 1. 命名空间 (Namespaces)
 
 ```typescript
-import { createNamespace } from '@yyc3/i18n-core';
+import { i18n } from '@yyc3/i18n-core';
 
-// 创建命名空间
-const userNS = createNamespace('user');
-const productNS = createNamespace('product');
+// createNamespace 是引擎实例方法（非独立导出）
+const userNS = i18n.createNamespace('user');
+const productNS = i18n.createNamespace('product');
 
-// 使用命名空间
-userNS.t('profile.name');     // user.profile.name
-productNS.t('detail.title');  // product.detail.title
+// 使用命名空间（自动拼接前缀）
+userNS.t('profile.name');     // → i18n.t('user.profile.name')
+productNS.t('detail.title');  // → i18n.t('product.detail.title')
 ```
 
 ### 2. 调试模式
@@ -1064,8 +1078,8 @@ tracker.generateReport();    // 完整性能报告
      await i18n.setLocale(item.locale);
    }
 
-   // ✅ 正确: 批量处理
-   const translations = await i18n.batchTranslate(keys);
+   // ✅ 正确: 批量处理（batchTranslate 为同步方法）
+   const translations = i18n.batchTranslate(keys);
    ```
 
 2. **不要忽略错误处理**
@@ -1115,7 +1129,7 @@ tracker.generateReport();    // 完整性能报告
 | **Infrastructure** | infra/*.test.ts | 30 | 100% | 90% |
 | **总计** | **30 files** | **621** | **✅ 100%** | **92.04%** |
 
-> 覆盖率为 CI `test:coverage` 语句覆盖率实证(v8 覆盖率,2026-09-26)。
+> 覆盖率为 CI `test:coverage` 语句覆盖率实证（v8 覆盖率，2026-09-26）。
 
 ### 运行测试
 
@@ -1178,7 +1192,7 @@ pnpm test -- -t "should translate with interpolation"
 ### 安全示例
 
 ```typescript
-// 均从根入口导出(Node.js 环境)
+// 均从根入口导出（Node.js 环境）
 import {
   compileSafeRegex,
   safeEqualSecret,
@@ -1307,19 +1321,28 @@ if (result.score > 0.9 && result.issues.length === 0) {
 | 图标 | 语义 | 应用章节 |
 | ------ | ------ | ---------- |
 | 🌐 | 国际化/多语言能力 | 概述、语言特性 |
+| 📑 | 目录导航 | 目录 |
 | ✨ | 特性总览 | 特性清单 |
+| 🤔 | 选型决策 | 为什么选择 |
+| 🎯 | 核心优势（`###` 子标题） | 特性概览内 |
+| 🏆 | 横向对比（`###` 子标题） | 特性概览内 |
 | 📦 | 安装与包管理 | 安装指南、核心模块 |
 | 🚀 | 快速开始/上手 | 快速开始 |
 | 🏗️ | 架构与构建 | 架构设计、构建与 CI |
-| 📖 | 文档与指南 | API 参考、迁移指南 |
-| 🔧 | 高级用法 | 高级功能 |
+| 🌳 | Tree Shaking / 按需加载 | 子路径导入 |
+| 📖 | 文档与指南 | API 参考 |
+| 🔧 | 高级用法（文档章节）· 修复（CHANGELOG 分类） | 高级功能 + CHANGELOG |
+| 🎨 | 最佳实践 | 最佳实践 |
 | 🧪 | 测试 | 测试覆盖 |
 | ⚡ | 性能 | 性能基准/优化 |
 | 🛡️ | 安全 | 安全特性（OWASP 矩阵） |
 | ❓ | FAQ | 常见问题 |
+| 🔄 | 迁移 | 迁移指南 |
 | 🎖️ | 可视化规范 | 本章节 |
 | 🤝 | 社区协作 | 贡献指南 |
 | 📄 | 法律 | License |
+
+> **🔧 命名空间说明**：🔧 同时服务于两个互不冲突的命名空间 —— 在**文档章节图标**语境中表示「高级功能」，在 **CHANGELOG 分类图标**语境中表示「修复」。同一命名空间内一个图标只承载一种含义；跨命名空间复用不视为语义冲突。
 
 ### CHANGELOG 分类图标
 
@@ -1350,7 +1373,7 @@ if (result.score > 0.9 && result.issues.length === 0) {
 git clone git@github.com:YYC-Cube/YYC3-i18n-Core.git
 cd YYC3-i18n-Core
 
-# 安装依赖(pnpm 11,根工作区含 packages/i18n-react)
+# 安装依赖（pnpm 11，根工作区含 packages/i18n-react）
 pnpm install
 
 # 开发模式(核心包构建监听)

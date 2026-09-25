@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 验证:`pnpm --dir docs build` 严格模式(无 ignoreDeadLinks)零死链通过;dist guide 17 页 + api 8 页;`best-practices.html` 实测含 `id="project-structure"` 等四锚点;IDE 诊断 0
 - **启用 `cleanUrls: true` 无扩展名 URL**:渲染链接去除 `.html` 扩展名(href="/guide/ai-translation" 形态);迁移面经评估为零断链——VitePress 产物仍为 foo.html 文件,GitHub Pages 原生支持 /foo → foo.html 解析,存量 .html 外链/搜索索引继续可用,无需 404 页或重定向表;目录式尾斜杠 /foo/ 形态原本即不支持,行为无变化。构建实测渲染链接无扩展名、.html 文件照常产出、10 语言目录与 ar RTL 完好
 - 验证:`pnpm --dir docs build` 零错误;dist 产出 root + 9 语言目录共 10 套页面;`ar/index.html` 实测 `<html lang="ar-SA" dir="rtl">`、其余 9 页 `dir="ltr"`;语言切换菜单 SSR HTML 含全 10 个语言名;hero action 链接解析为各语言自有 `/<locale>/guide/getting-started.html`(均真实存在,无死链)
+- **README 全文复审 + 图标体系对齐文档架构**:修复目录标题 mojibake 乱码(`## �` → `## 📑 目录`)与 TOC `#-概述` 断链(`## 概述` → `## 🌐 概述`,标题入 emoji 语义体系);残留 API 事实错误清零——ICU 示例 `ICUParser.parse()` 静态误用改为实例方法(返回 `{ast,errors}`,docs/guide/icu-messageformat.md 同源修正)、双导入路径 `@yyc3/i18n-core/icu`(仅导出 ICUParser)改 `/browser`(ICUParser+ICUCompiler 双导出真实入口,4 处;仅 parser 的 1 处合法保留)、命名空间示例误标 `createNamespace` 为独立导出(实为引擎实例方法 `i18n.createNamespace`)、类签名删除不存在的 `init()` 并补齐 `getLocale`/`registerTranslation`/`createNamespace`/`setDebug`/`cache` 只读属性(与 engine.ts 13 成员对齐)、`{count: 5}` 数字字面量改字符串 `'5'`(对齐 TranslateParams,3 处)、`await batchTranslate` 残留删除;Node 中间件示例补 `await setLocale` + 新增并发隔离警示(实例级全局状态会串语言,指引独立实例/AsyncLocalStorage);章节图标规范表补齐 7 个实际使用图标(📑目录/🤔选型/🎯核心优势/🏆对比/🌳Tree Shaking/🎨最佳实践/🔄迁移)并注明 🔧 双命名空间语义(文档章节=高级功能,CHANGELOG 分类=修复);8 处散文半角标点规范化为全角
 
 ---
 
