@@ -32,6 +32,7 @@
   ],
   "author": "YanYuCloudCube Team <admin@0379.email>",
   "license": "MIT",
+  "packageManager": "pnpm@11.10.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/YYC-Cube/YYC3-i18n-Core.git"

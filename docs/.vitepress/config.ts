@@ -4,6 +4,11 @@ export default defineConfig({
   title: '@yyc3/i18n-core',
   description: '生产级国际化框架 · 中文原生优化 · AI-Powered · MCP Integration',
 
+  // TODO(内容补全): 以下页面在写作规划中但尚未落地,补齐后移除此项:
+  // guide/best-practices, ai-translation, mcp-integration, react-integration, security(zh/en)
+  // 以及指向仓库根 README 的 ./../README 链接(VitePress 无法解析 docs 目录外文件)
+  ignoreDeadLinks: true,
+
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],

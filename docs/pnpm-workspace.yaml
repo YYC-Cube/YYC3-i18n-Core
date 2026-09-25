@@ -1,0 +1,6 @@
+# VitePress 文档站为独立工作区(不入根 packages/*),
+# 避免 pnpm 向上探测到根 pnpm-workspace.yaml;自带锁文件支持 CI frozen 安装
+packages: []
+
+allowBuilds:
+  esbuild: true
