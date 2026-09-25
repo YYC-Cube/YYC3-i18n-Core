@@ -616,6 +616,6 @@ Tree-shaken (single feature):      ~2-5 KB gzip
 
 **Need more examples?** Check out our [GitHub repository](https://github.com/YanYuCloudCube/yyc3-i18n-core/examples) for complete working projects!
 
-[⬆️ Back to Home](../README.md) | [⬅️ Quick Start](./getting-started.md) | [➡️ Best Practices](./best-practices.md)
+[⬆️ Back to Home](/) | [⬅️ Quick Start](./getting-started.md) | [➡️ Best Practices](./best-practices.md)
 
 </div>

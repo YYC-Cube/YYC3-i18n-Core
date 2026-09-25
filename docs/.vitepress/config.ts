@@ -243,11 +243,6 @@ export default defineConfig({
   title: '@yyc3/i18n-core',
   description: '生产级国际化框架 · 中文原生优化 · AI-Powered · MCP Integration',
 
-  // TODO(内容补全): 以下页面在写作规划中但尚未落地,补齐后移除此项:
-  // guide/best-practices, ai-translation, mcp-integration, react-integration, security(zh/en)
-  // 以及指向仓库根 README 的 ./../README 链接(VitePress 无法解析 docs 目录外文件)
-  ignoreDeadLinks: true,
-
   // markdown 配置为全局级(LocaleSpecificConfig 不接受该字段)。
   // root 为中文站;非中文页面的容器标题通过 `::: tip {title}` 内联本地化。
   // 注: VitePress 1.6 无 codeCopyButton 配置项,复制按钮文案不可配置。

@@ -49,7 +49,6 @@ interface I18nEngineConfig {
   locale?: Locale;                    // 初始语言
   fallbackLocale?: Locale;            // 回退语言
   cache?: {
-    enabled?: boolean;                // 是否启用缓存（默认 true）
     maxSize?: number;                 // 最大缓存条目数（默认 1000）
     ttl?: number;                     // 缓存过期时间毫秒（默认 5 分钟）
   };
@@ -67,10 +66,9 @@ interface I18nEngineConfig {
 
 ```typescript
 const engine = new I18nEngine({
-  defaultLocale: 'zh-CN',
+  locale: 'zh-CN',
   fallbackLocale: 'en',
   cache: {
-    enabled: true,
     maxSize: 500,
     ttl: 10 * 60 * 1000,  // 10 分钟
   },
@@ -80,21 +78,20 @@ const engine = new I18nEngine({
 
 #### 方法 (Methods)
 
-##### `init(config)`
+##### `registerTranslation(locale, map)` / `setLocale(locale)`
 
-初始化引擎。
+注册语言资源并激活语言（无 init 步骤，引擎构造即可用）。
 
 ```typescript
-async init(config?: I18nEngineConfig): Promise<void>
+registerTranslation(locale: Locale, map: TranslationMap): void
+async setLocale(locale: Locale): Promise<void>
 ```
 
 **示例：**
 
 ```typescript
-await i18n.init({
-  defaultLocale: 'zh-CN',
-  fallbackLocale: 'en',
-});
+i18n.registerTranslation('zh-CN', zhCN);
+await i18n.setLocale('zh-CN');
 ```
 
 ##### `t(key, params?)`
@@ -277,7 +274,8 @@ async destroy(): Promise<void>
 ```typescript
 import { i18n } from '@yyc3/i18n-core';
 
-await i18n.init({ defaultLocale: 'zh-CN' });
+i18n.registerTranslation('zh-CN', zhCN);
+await i18n.setLocale('zh-CN');
 ```
 
 #### `t`
@@ -288,16 +286,6 @@ await i18n.init({ defaultLocale: 'zh-CN' });
 import { t } from '@yyc3/i18n-core';
 
 t('common.welcome');  // "欢迎"
-```
-
-#### `setLocale`
-
-全局便捷函数，等同于 `i18n.setLocale()`。
-
-```typescript
-import { setLocale } from '@yyc3/i18n-core';
-
-await setLocale('en');
 ```
 
 ---
@@ -389,7 +377,6 @@ constructor(config?: CacheConfig)
 
 ```typescript
 interface CacheConfig {
-  enabled?: boolean;      // 是否启用（默认 true）
   maxSize?: number;       // 最大条目数（默认 1000）
   defaultTTL?: number;    // 默认过期时间毫秒（默认 5 分钟）
 }
@@ -398,7 +385,7 @@ interface CacheConfig {
 #### 方法
 
 | 方法 | 签名 | 说明 |
-|------|------|------|
+| ------ | ------ | ------ |
 | `get` | `get(key: K): V \| null` | 获取缓存值 |
 | `set` | `set(key: K, value: V, ttl?: number): void` | 设置缓存值 |
 | `has` | `has(key: K): boolean` | 检查键是否存在 |
@@ -523,7 +510,7 @@ reporter.exportJSON();         // JSON 格式
 **方法：**
 
 | 方法 | 返回类型 | 说明 |
-|------|----------|------|
+| ------ | ---------- | ------ |
 | `generateReport()` | `string` | 生成格式化报告 |
 | `exportJSON()` | `string` | 导出 JSON 数据 |
 | `getMissingKeys()` | `string[]` | 获取所有缺失键 |
@@ -557,7 +544,7 @@ tracker.generateReport();
 **方法：**
 
 | 方法 | 返回类型 | 说明 |
-|------|----------|------|
+| ------ | ---------- | ------ |
 | `getMetrics()` | `PerformanceMetrics` | 获取完整指标 |
 | `getCacheHitRate()` | `number` | 缓存命中率（0-100） |
 | `getPercentile(p)` | `number` | 获取 P50/P95/P99 延迟 |
@@ -590,6 +577,7 @@ interface LocaleDetectionResult {
 ```
 
 **检测优先级：**
+
 1. 环境变量 (`NEXT_LOCALE`, `PUBLIC_LOCALE`)
 2. LocalStorage 存储值
 3. 浏览器/系统语言
@@ -1185,11 +1173,11 @@ type TranslationMap = {
 
 ## 🔗 相关链接 (Related Links)
 
-- [快速开始](./guide/getting-started.md) - 5 分钟上手指南
-- [最佳实践](./guide/best-practices.md) - 生产环境建议
-- [AI 翻译](./guide/ai-translation.md) - LLM 集成详细文档
-- [MCP 协议](./guide/mcp-integration.md) - AI Agent 工具集成
-- [GitHub Issues](https://github.com/YanYuCloudCube/yyc3-i18n-core/issues) - 问题反馈
+- [快速开始](/guide/getting-started) - 5 分钟上手指南
+- [最佳实践](/guide/best-practices) - 生产环境建议
+- [AI 翻译](/guide/ai-translation) - LLM 集成详细文档
+- [MCP 协议](/guide/mcp-integration) - AI Agent 工具集成
+- [GitHub Issues](https://github.com/YYC-Cube/YYC3-i18n-Core/issues) - 问题反馈
 
 ---
 
@@ -1197,6 +1185,6 @@ type TranslationMap = {
 
 **📖 完整 API 文档持续更新中...**
 
-[⬆️ 返回主页](../README.md) | [⬅️ 快速开始](./guide/getting-started.md) | [➡️ 最佳实践](./guide/best-practices.md)
+[⬆️ 返回主页](/) | [⬅️ 快速开始](/guide/getting-started) | [➡️ 最佳实践](/guide/best-practices)
 
 </div>
