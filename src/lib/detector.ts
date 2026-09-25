@@ -80,10 +80,10 @@ function detectFromEnvironment(): LocaleDetectionResult | null {
     process.env?.LANG,
     process.env?.LC_ALL,
     process.env?.LC_MESSAGES,
-  ].filter(Boolean);
+  ].filter((v): v is string => Boolean(v));
 
   for (const envVar of envVars) {
-    const normalized = normalizeLocale(envVar!);
+    const normalized = normalizeLocale(envVar);
     if (normalized) {
       return { locale: normalized, source: "env", confidence: 0.95 };
     }

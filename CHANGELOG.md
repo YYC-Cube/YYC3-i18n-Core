@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.4.2] - 2026-08-26
+## [Unreleased]
+
+### 🔒 安全
+
+- **依赖漏洞清零(9 个已公告)`pnpm audit` 全绿**:brace-expansion DoS ×6(指数级展开/无界长度/无界中间数组)、vitest 与 @vitest/mocker 路径穿越任意文件读取、esbuild dev server 任意文件读取(Windows)。经 `pnpm-workspace.yaml` `overrides` 分 major 锁定:brace-expansion `<2 → >=1.1.18`、`>=2 → >=5.0.12`,esbuild `>=0.28.1`;vitest 与 @vitest/coverage-v8 升级至 `^4.1.11`(顺带修正 coverage-v8 1.x 对 vitest 4.x 的版本错配)
+
+### 🔧 修复
+
+- **lint 零警告闭环**:消除 13 处 `@typescript-eslint/no-non-null-assertion`——索引访问冗余断言直接移除(项目未开 `noUncheckedIndexedAccess`);`Map.has + get!` 三处(safe-regex/console-logger/missing-key-reporter)重构为 `get` + 判空;`filter(Boolean)` 改为类型谓词 `(v): v is string`;另消除 1 处未使用 catch 绑定(改可选 catch 绑定)
+- **backoff 潜在 `throw undefined`**:`createRetryRunner` 在 `maxAttempts=0` 时 `throw lastError!` 实际抛出 undefined,现回退为显式 `Error`
+
+### 🏗️ 构建与 CI
+
+- CI 新增 `pnpm audit --audit-level=moderate` 安全门禁;lint 收紧为 `--max-warnings 0`(去除 `|| true` 假绿);`test` 切换为 `test:coverage`(覆盖率门禁真实生效);构建覆盖 workspace 全包(`pnpm -r build`,补上 i18n-react 从未入 CI 的缺口);显式最小权限与超时
+- Pages 部署:CNAME 统一为单一来源 `Public/CNAME`(`i18.yyc3.vip`),构建后注入 dist;删除失效且含误拼域名(`docs.yyv3.vip`)的 `docs/CNAME`;deploy-docs 工作流接入 `actions/configure-pages@v5`,docs 改用自带依赖构建(去除 CI 内 `pnpm add` 的不可复现操作)
+- `@vitest/coverage-v8` v4 插桩对分支计数更精确(`??`/`||`/三元分支独立计数),分支覆盖率阈值按新口径 89 → 85 重基线(当前实际 85.25%,statements/functions/lines 仍 >= 90)
+
+---
 
 ### 🔧 变更
 
@@ -171,7 +188,7 @@ See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed migration instructio
 ## 版本说明
 
 | 版本 | 类型 | 发布日期 | 状态 | 说明 |
-|------|------|----------|------|------|
+| ------ | ------ | ---------- | ------ | ------ |
 | **2.4.2** | Patch | 2026-08-26 | ✅ Stable | 净化版发布(按 npm Support 指引),内容同 2.4.1 |
 | **2.4.1** | Patch | 2026-08-19 | ⚠️ 未上架 | browser 子路径入口 + detector 浏览器安全修复(被 npm WAF 拦截) |
 | **2.4.0** | Minor | 2026-08-18 | ✅ Stable | AI-Native i18n with MCP Protocol |
@@ -194,7 +211,7 @@ See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed migration instructio
 
 ---
 
-[2.4.2]: https://github.com/YYC-Cube/YYC3-i18n-Core/releases/tag/v2.4.2
+[Unreleased]: https://github.com/YYC-Cube/YYC3-i18n-Core/compare/v2.4.2...HEAD
 [2.4.1]: https://github.com/YYC-Cube/YYC3-i18n-Core/releases/tag/v2.4.1
 [2.3.0]: https://github.com/YanYuCloudCube/Family-PAI/releases/tag/i18n-v2.3.0
 [2.1.0]: https://github.com/YanYuCloudCube/Family-PAI/releases/tag/i18n-v2.1.0

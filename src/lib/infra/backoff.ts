@@ -79,7 +79,7 @@ export function createRetryRunner<T>(options: {
       }
     }
 
-    throw lastError!;
+    throw lastError ?? new Error("retry runner exhausted without executing any attempt");
   };
 }
 

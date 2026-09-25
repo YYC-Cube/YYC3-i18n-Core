@@ -72,8 +72,9 @@ function hasUnsafeNestedRepetition(source: string): boolean {
 export function compileSafeRegex(source: string, flags?: string): SafeRegexCompileResult {
   const key = `${source}::${flags ?? ""}`;
 
-  if (safeRegexCache.has(key)) {
-    return safeRegexCache.get(key)!;
+  const cached = safeRegexCache.get(key);
+  if (cached) {
+    return cached;
   }
 
   if (!source) {

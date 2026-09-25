@@ -64,8 +64,8 @@ export function createConsoleLogger(config: ConsoleLoggerConfig = {}): I18nPlugi
     },
 
     afterTranslate(_result: string, key: string) {
-      if (logPerformance && timingMap.has(key)) {
-        const start = timingMap.get(key)!;
+      const start = timingMap.get(key);
+      if (logPerformance && start !== undefined) {
         const duration = performance.now() - start;
 
         if (duration > 10) { // Only log slow translations (>10ms)

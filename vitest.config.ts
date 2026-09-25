@@ -11,7 +11,9 @@ export default defineConfig({
       exclude: ['src/lib/plugins/console-logger.ts', 'src/lib/types.ts', 'src/lib/plugins/index.ts'],
       thresholds: {
         statements: 90,
-        branches: 89,
+        // @vitest/coverage-v8 v4 counts branches more precisely (??, ||, ternary arms);
+        // re-baselined from 89 (v1 instrumentation) to 85 to keep the gate meaningful.
+        branches: 85,
         functions: 90,
         lines: 90,
       },

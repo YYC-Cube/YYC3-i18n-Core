@@ -316,7 +316,7 @@ export class ICUParser {
       result += "-";
       this.pos++;
     }
-    while (this.pos < this.input.length && /\d/.test(this.input[this.pos]!)) {
+    while (this.pos < this.input.length && /\d/.test(this.input[this.pos])) {
       result += this.input[this.pos];
       this.pos++;
     }
@@ -325,7 +325,7 @@ export class ICUParser {
 
   private parseIdentifier(): string {
     let result = "";
-    while (this.pos < this.input.length && /[a-zA-Z0-9_-]/.test(this.input[this.pos]!)) {
+    while (this.pos < this.input.length && /[a-zA-Z0-9_-]/.test(this.input[this.pos])) {
       result += this.input[this.pos];
       this.pos++;
     }
@@ -337,7 +337,7 @@ export class ICUParser {
   }
 
   private skipWhitespace(): void {
-    while (this.pos < this.input.length && /\s/.test(this.input[this.pos]!)) {
+    while (this.pos < this.input.length && /\s/.test(this.input[this.pos])) {
       this.pos++;
     }
   }

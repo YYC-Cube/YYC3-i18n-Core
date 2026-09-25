@@ -84,7 +84,7 @@ export class StdioTransport implements MCPTransport {
         continue;
       }
 
-      const contentLength = parseInt(match[1]!, 10);
+      const contentLength = parseInt(match[1], 10);
       const bodyStart = headerEnd + 4;
       const bodyEnd = bodyStart + contentLength;
 

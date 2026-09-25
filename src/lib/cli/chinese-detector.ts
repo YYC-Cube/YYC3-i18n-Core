@@ -64,7 +64,7 @@ export class ChineseDetector {
     const lines = content.split("\n");
 
     for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-      const line = lines[lineIdx]!;
+      const line = lines[lineIdx];
       if (!line) continue;
 
       if (!CJK_PATTERN.test(line)) continue;

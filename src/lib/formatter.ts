@@ -130,7 +130,7 @@ export function formatRelativeTime(timestamp: number, locale: string): string {
   const days = Math.floor(hours / 24);
 
   const family = resolveLocaleFamily(locale);
-  const msgs = RELATIVE_TIME_MESSAGES[family]!;
+  const msgs = RELATIVE_TIME_MESSAGES[family];
 
   if (seconds < 60) return msgs.justNow;
   if (minutes < 60) return msgs.minutes(minutes);

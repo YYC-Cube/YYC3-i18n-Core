@@ -169,7 +169,7 @@ export function createMirroredLayout<T extends Record<string, string>>(
       );
 
       const record = mirrored as Record<string, string>;
-      record[oppositeKey] = record[key]!;
+      record[oppositeKey] = record[key];
       delete record[key];
     }
   }

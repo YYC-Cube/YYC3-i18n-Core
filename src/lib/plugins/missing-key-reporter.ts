@@ -60,8 +60,8 @@ export class MissingKeyReporter {
       onMissingKey(key: string, locale: Locale): string | undefined {
         const entryKey = `${locale}:${key}`;
 
-        if (self.entries.has(entryKey)) {
-          const existing = self.entries.get(entryKey)!;
+        const existing = self.entries.get(entryKey);
+        if (existing) {
           existing.count++;
           existing.timestamp = Date.now();
         } else {
