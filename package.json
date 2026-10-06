@@ -55,8 +55,8 @@
       "types": "./dist/lib/cache.d.ts"
     },
     "./plugins": {
-      "import": "./dist/plugins/index.js",
-      "types": "./dist/plugins/index.d.ts"
+      "import": "./dist/lib/plugins/index.js",
+      "types": "./dist/lib/plugins/index.d.ts"
     },
     "./icu": {
       "import": "./dist/lib/icu/parser.js",
