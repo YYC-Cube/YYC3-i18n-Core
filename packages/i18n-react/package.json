@@ -1,6 +1,6 @@
 {
   "name": "@yyc3/i18n-react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "React bindings for @yyc3/i18n-core — useTranslation hook, <Trans> component, Next.js middleware",
   "keywords": [
     "react",

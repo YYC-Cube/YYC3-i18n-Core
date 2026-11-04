@@ -157,7 +157,7 @@ phase: testing
 | README 一致性 | 署名 AI Team/版本戳 2.4.2/1.4.0×2/LRUCache 双泛型示例 | 全部修正 + 补 `./node`、`./browser` 子路径行与 3.1.0 迁移说明 + 标准居中页脚 | ✅ |
 | 回归 | — | 621/621 测试、typecheck/lint 0 错、消费者冒烟 **24/24**、覆盖率 92.05/85.1/93.35/93.15（过 90/85/90/90 门禁）、标头标尾门禁 109/109 | ✅ |
 
-**版本状态**：本地 package.json 已对齐 **3.1.0**（exports 变更 + engines 变更属 minor 级），发布动作留待维护者执行 `pnpm publish`（prepublishOnly 已串联 test + 门禁 + size）。生产健康度 **A− → A**。
+**版本状态**：**3.1.0 已发布至 npm（2026-11-04，tarball 30 文件 / 66.5 kB，prepublishOnly 五道门禁全过：clean→build→621 测试→标头标尾门禁→size）。生产健康度 A− → A。**
 
 ---
 

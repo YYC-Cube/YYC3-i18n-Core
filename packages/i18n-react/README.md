@@ -2,7 +2,7 @@
 
 > React bindings for [@yyc3/i18n-core](https://github.com/YYC-Cube/YYC3-i18n-Core) — Zero-boilerplate i18n with AI translation + MCP protocol
 
-> **发布状态**：本包尚未发布到 npm registry。请在 monorepo 内以 workspace 方式引用（`"@yyc3/i18n-react": "workspace:*"`），或通过 git 仓库安装；`npm install @yyc3/i18n-react` 将在首发版本后可用。
+> **发布状态**：v0.2.0 已发布至 npm（`@yyc3/i18n-react@0.2.0`，peer 要求 `@yyc3/i18n-core@>=3.1.0`）；monorepo 内仍可按 `workspace:*` 引用。
 
 ## Install
 

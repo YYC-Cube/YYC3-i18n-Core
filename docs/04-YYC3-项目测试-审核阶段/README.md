@@ -81,7 +81,7 @@ phase: testing
 | 持续 | 标头标尾回灌 + CI 门禁化 | ✅ 完成（109/109 + 273/273，门禁入库） |
 | 后续 | 分支覆盖率 90 策略线（当前门禁 85、实测 85.1） | ⏳ 留待（门禁有重定基线注释依据） |
 
-**v1.1.0 终态评级**：i18n-core **A− → A**（3.1.0 就绪待发布）· i18n-react **C → B+**（待联动首发）· cli-integration **F → A− → A**（v1.2.0：YYC3-CLI 侧集成验证完成，file: 单源引入 + 薄适配 + 命令组注册，端到端全绿）。新增修复：C7 显式 locale、R7 workspace 链接、T1 Trans fallback、L7 ESM 误判（共 4 项修复中发现的新缺陷）。
+**v1.1.0 终态评级**：i18n-core **A− → A**（**3.1.0 已发布 npm，2026-11-04**）· i18n-react **C → B+**（**0.2.0 已联动首发**）· cli-integration **F → A− → A**（v1.2.0：YYC3-CLI 侧集成验证完成，file: 单源引入 + 薄适配 + 命令组注册，端到端全绿）。新增修复：C7 显式 locale、R7 workspace 链接、T1 Trans fallback、L7 ESM 误判（共 4 项修复中发现的新缺陷）。
 
 ---
 
@@ -92,6 +92,7 @@ phase: testing
 | v1.0.0 | 2026-11-04 | 首次发布：三包闭环审查总览（17 项发现、评级 A−/C/F、整改优先序） | YYC³ Team |
 | v1.1.0 | 2026-11-04 | 整改复测：17 项发现全部闭环 + 4 项新发现缺陷修复；终态评级 A / B+ / A−；含 C2 口径勘误与分支覆盖率后续项 | YYC³ Team |
 | v1.2.0 | 2026-11-04 | YYC3-CLI 侧集成验证完成（cli-integration 评级 A）；双项目 main 同步提交 | YYC³ Team |
+| v1.3.0 | 2026-11-04 | npm 发布完成：@yyc3/i18n-core@3.1.0（30 文件 tarball，prepublish 五道门禁通过）+ @yyc3/i18n-react@0.2.0 联动首发 | YYC³ Team |
 
 ---
 

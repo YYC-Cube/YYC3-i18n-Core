@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.0] - 2026-11-04
+
+生产闭环审查（17 项发现全闭环 + 修复中新发现 4 项缺陷）后的版本，报告见 `docs/04-YYC3-项目测试-审核阶段/`。
+
+### 🚀 新增
+
+- **`./node` 子路径**：`StdioTransport` + 路径防护（`isNodeError` 等）+ JSON 文件操作工具迁出主入口——`index.d.ts`/`browser.d.ts` 对 Web 消费者零 Node 类型依赖（类型矩阵 A/B/C 全 0 错，无 `@types/node` 亦可编译）
+- **主入口透出** `SUPPORTED_LOCALES` / `isSupportedLocale`；`LRUCache<T = unknown>` 显式默认泛型
+
+### 🔧 修复
+
+- **显式 locale 被覆盖（C7）**：`new I18nEngine({ locale: 'zh-CN' })` 曾被 `loadInitialLocale()` 以「存储/探测」结果覆盖回 `en`；现构造参数拥有最高优先级
+- **`<Trans>` fallback 生效（T1，@yyc3/i18n-react 同步修复）**：引擎缺键返回键名导致 fallback 永不触发，现按 `text === id` 判定缺失
+
+### ⚠️ 破坏性变更（minor 内导出面调整）
+
+- `StdioTransport`、`path-guards`、`json-file` 系列导出从主入口 `.` 迁移至 `./node`；原从主入口导入的代码请改 `import { ... } from '@yyc3/i18n-core/node'`
+- `engines` 由 `>=18` 提升至 **`>=20.19.0`**（`exports` 的 `require` 条件指向 ESM 产物，需 require(esm) 支持）
+
+### 🏗️ 构建与 CI
+
+- **size-limit 实装**（原为未安装的死配置）：红线 95 kB（压缩口径），实测 brotli 17.27 kB；接入 CI 与 `prepublishOnly`
+- **标头标尾门禁**：全仓 110/110 代码品牌标头+标准标尾（100%）、21 篇文档 273/273 校验点；`scripts/header-footer-check.mjs` 入库并接入 CI/`prepublishOnly`
+- **CI 七道门禁**：`pnpm -r typecheck`（全仓）+ lint + cli `node --check` + 标头标尾 + coverage + react 测试 + size
+- **@yyc3/i18n-react 0.2.0 联动首发**：tsconfig 对齐 ES2022、新增 4 测试文件 21 用例（SSR 冒烟 6/6）、peer 收紧 `>=3.1.0`、README API 修正（`{ locale }` 非 `defaultLocale`）、workspace 链接修正（`workspace:*`）
+
+### 🧪 复测总账
+
+621+21 测试全绿；覆盖率 92.05 / 85.1 / 93.35 / 93.15；消费者冒烟 24/24 + 6/6；cli-integration 功能验证 12/12 + YYC3-CLI 端到端全绿
+
+---
+
 ## [Unreleased]
 
 ### 🔒 安全
