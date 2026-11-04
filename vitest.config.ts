@@ -19,9 +19,9 @@ export default defineConfig({
       exclude: ['src/lib/plugins/console-logger.ts', 'src/lib/types.ts', 'src/lib/plugins/index.ts'],
       thresholds: {
         statements: 90,
-        // @vitest/coverage-v8 v4 counts branches more precisely (??, ||, ternary arms);
-        // re-baselined from 89 (v1 instrumentation) to 85 to keep the gate meaningful.
-        branches: 85,
+        // Raised to the team strategy line (《测试策略》90%+) after branch-closure
+        // tests (2026-11-04): 85 → 90, actual 91.47%.
+        branches: 90,
         functions: 90,
         lines: 90,
       },

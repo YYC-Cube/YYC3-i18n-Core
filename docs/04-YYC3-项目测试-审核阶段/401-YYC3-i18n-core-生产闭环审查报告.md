@@ -118,7 +118,7 @@ phase: testing
 | C1 | P2 | 已发布 d.ts 泄漏 Node 类型，B/C 场景类型检查失败（§2.5） | 将 `json-file`/`path-guards` 重导出迁移至 `./node` 子路径；或 d.ts 内改用结构化类型并随包声明 `@types/node`（devDep 不入产物，需 `dependencies` 或 peer 建议） |
 | C2 | P2 | `size-limit` 配置 45 kB 为**死配置**：工具未安装（pnpm-lock 0 命中）、无 script、CI 未执行；实际 index.js 89,165 B 超限 97.9% | 二选一：安装 size-limit 并接入 CI 后按 90 kB 重定基线；或删除该配置避免误导 |
 | C3 | P2 | `exports["."].require` 指向 ESM 产物，但 `engines: >=18`；Node 18/20 早期 CJS 消费者将 `ERR_REQUIRE_ESM` | engines 提至 `>=20.19` 并在 README 标注；或移除 require 条件 |
-| C4 | P3 | 分支覆盖率 85.07% 低于团队 90% 参考线 | 对 `src/lib/cli`、错误分支补测 |
+| C4 | P3 | 分支覆盖率 85.07% 低于团队 90% 参考线 | ✅ 已收口（v1.4.0 终极审核）：4 个分支闭合测试文件 88 用例，实测 **91.47%**，门禁 85→90 提至策略线；顺带发现并修复 W1（createMirroredLayout 镜像失效） |
 | C5 | P3 | `SUPPORTED_LOCALES`/`isSupportedLocale` 引擎已导出、主入口未透出，README 亦无说明 | 明确 API 面：透出或标注 internal |
 | C6 | P3 | `LRUCache.get()` 返回 `unknown` 且非泛型，消费者需断言 | 下一版本改为 `get<T = unknown>()` |
 

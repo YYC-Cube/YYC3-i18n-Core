@@ -41,6 +41,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔧 修复
+
+- **RTL 镜像缺陷（终极审核新发现 W1）**：`createMirroredLayout` 的 `mirrorKeys` 同时包含 Left/Right 两侧，循环内从**自身镜像结果**读取值，导致后一个 mirrorKey 把前一个刚写入的对侧值再次镜像回原侧——`marginLeft` 永远无法镜像为 `marginRight`，RTL 布局镜像功能整体失效（双侧并存时右值丢失）。现改为从原始 `ltrConfig` 读取：单侧配置正确镜像（Left→Right 且移除原键），双侧并存为互换语义（两侧均保留）；`tests/rtl-utils` 29 项存量断言全数通过
+
+### 🧪 测试与质量
+
+- **分支覆盖率门禁 85 → 90（策略线闭环，终极审核遗留项完成）**：新增 4 个分支闭合测试文件（icu/engine/infra/wave2）共 88 用例，分支覆盖率 **85.1% → 91.47%**，`vitest.config.ts` 阈值提升至团队《测试策略》90% 线并附基线注释；总账 **709 测试全绿**（语句 96.67 / 分支 91.47 / 函数 96.82 / 行 97.6）
+- 覆盖短板补强覆盖 parser/compiler 错误路径、engine debug/缓存/懒加载边角、detector 环境变量与别名深边角、backoff abort、win32 路径判定（平台桩）、stdio 分帧、以及 lazy locale 六语言 loader 全量调用
+
+
+
 ### 🔒 安全
 
 - **docs 工作区依赖漏洞清零(audit 4 项:1 high 3 moderate,Dependabot 同源 4 告警)**:vite 5.4.21 已 EOL,修复仅存在于 6.4.3+(GHSA-fx2h-pf6j-xcff high / GHSA-v6wh-96g9-6wx3 / GHSA-4w7w-66w2-5vf9),esbuild<=0.24.2(GHSA-67mh-4wv8-2f99)由 vite 6.4.x 传递依赖 esbuild ^0.25 一并消除;经 `docs/pnpm-workspace.yaml` override `vite: ^6.4.3` 重生成锁文件(vite 6.4.3 发布于 2026-06-01,24h 冷却合规;vitepress 1.6 peer 支持 `^5.4.0 || ^6`),实测 `pnpm audit` → No known vulnerabilities;根工作区与 examples 复扫均为零漏洞

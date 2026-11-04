@@ -169,16 +169,22 @@ export function createMirroredLayout<T extends Record<string, string>>(
   ];
 
   const mirrored = { ...ltrConfig };
+  const source = ltrConfig as Record<string, string>;
 
+  // 从原始 ltrConfig 读取镜像值：若读自身（mirrored），后一个 mirrorKey 会把
+  // 前一个刚写入的对侧值再次镜像回去，导致 Left→Right 镜像整体失效
   for (const key of mirrorKeys) {
-    if (key in mirrored) {
+    if (key in source) {
       const oppositeKey = key.replace(/Left|Right/, (match) =>
         match === 'Left' ? 'Right' : 'Left'
       );
 
       const record = mirrored as Record<string, string>;
-      record[oppositeKey] = record[key];
-      delete record[key];
+      record[oppositeKey] = source[key];
+      // 对侧原本不存在（纯单侧配置）才移除原键；双侧并存时为互换语义，两侧均保留
+      if (!(oppositeKey in source)) {
+        delete record[key];
+      }
     }
   }
 
