@@ -10,3 +10,8 @@ docs/.vitepress/dist
 docs/.vitepress/cache
 tmp/
 temp/
+
+# 本地工具状态目录
+.mimosa/
+.v2c/
+.video_agent/
