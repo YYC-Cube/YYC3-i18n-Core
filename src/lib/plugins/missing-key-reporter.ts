@@ -26,7 +26,8 @@ import { logger } from "../infra/logger.js";
 import type { I18nPlugin } from "../plugins.js";
 import type { Locale } from "../types.js";
 
-interface MissingKeyEntry {
+/** 缺失键条目（3.4.1 起随公共面导出——getMissingKeys() 返回类型的消费需要）。 */
+export interface MissingKeyEntry {
   key: string;
   locale: Locale;
   timestamp: number;

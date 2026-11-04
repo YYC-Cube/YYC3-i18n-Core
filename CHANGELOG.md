@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.1] - 2026-11-05
+
+G4.2（@yyc3/i18n-dashboard）消费需求驱动的类型导出面补齐（纯 additive，零运行时变更）。
+
+### 🔧 修复
+
+- **公共 API 返回类型的类型导出缺口**：`MissingKeyEntry`（`getMissingKeys()` 返回类型）此前为内部接口；`PerformanceTrackerConfig`/`PerformanceMetrics`/`ConsoleLoggerConfig` 仅在 `./plugins` 子路径而主入口缺失——四类型现随主入口导出（G4.2 dashboard 的 peer `>=3.4.1` 依据）
+
+### 🚀 关联交付（workspace 包）
+
+- **@yyc3/i18n-dashboard 0.1.0 首发另行发布**：`useI18nHealth` 钩子 + `I18nHealthDashboard` 五面板（性能/覆盖率/缺键/OTA/审计）；SSR 安全、无样式依赖；CI 三步接线（typecheck/build/test）
+
+---
+
 ## [3.4.0] - 2026-11-05
 
 501 方案 **G4 平台化第一增量**（OTA 热更新 + 企业审计 + 协议面暴露）；Dashboard（@yyc3/i18n-dashboard React 包）定位 G4.2 后续增量。

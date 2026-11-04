@@ -47,7 +47,9 @@ export {
 } from "./lib/plugins/index.js";
 export type {
   GlossaryEntry, GlossaryViolation, GlossaryCheckResult,
-  AuditEntry, AuditEventType, AuditLoggerConfig
+  AuditEntry, AuditEventType, AuditLoggerConfig,
+  MissingKeyReporterConfig, MissingKeyEntry,
+  PerformanceTrackerConfig, PerformanceMetrics, ConsoleLoggerConfig
 } from "./lib/plugins/index.js";
 
 // Formatter utilities

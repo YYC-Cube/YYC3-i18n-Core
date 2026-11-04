@@ -40,7 +40,7 @@ jobs:
         run: pnpm audit --audit-level=moderate
 
       - name: Type check (root + workspace packages)
-        run: pnpm typecheck && pnpm --filter @yyc3/i18n-react typecheck
+        run: pnpm typecheck && pnpm --filter @yyc3/i18n-react --filter @yyc3/i18n-dashboard typecheck
 
       - name: Lint (zero warnings)
         run: pnpm exec eslint src/ --max-warnings 0
@@ -52,7 +52,7 @@ jobs:
         run: pnpm audit:headers
 
       - name: Build (root first, then workspace packages)
-        run: pnpm build && pnpm --filter @yyc3/i18n-react build
+        run: pnpm build && pnpm --filter @yyc3/i18n-react --filter @yyc3/i18n-dashboard build
 
       - name: Test with coverage (skills 脚本冒烟依赖 dist——build 前置于此)
         run: pnpm test:coverage
@@ -60,8 +60,8 @@ jobs:
       - name: Exports contract gate (zero-deps + artifacts, post-build)
         run: pnpm audit:contract
 
-      - name: Test @yyc3/i18n-react
-        run: pnpm --filter @yyc3/i18n-react test
+      - name: Test @yyc3/i18n-react + @yyc3/i18n-dashboard
+        run: pnpm --filter @yyc3/i18n-react --filter @yyc3/i18n-dashboard test
 
       - name: Bundle size gate
         run: pnpm size
