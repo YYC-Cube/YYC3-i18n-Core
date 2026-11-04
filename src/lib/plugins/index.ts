@@ -31,9 +31,12 @@ export type { MissingKeyReporterConfig } from "./missing-key-reporter.js";
 export { PerformanceTracker } from "./performance-tracker.js";
 export type { PerformanceTrackerConfig, PerformanceMetrics } from "./performance-tracker.js";
 
-// 插件合同 v2（3.2.0 起，501 G1）
-export { definePlugin, DEFAULT_PLUGIN_PRIORITY } from "../plugins.js";
-export type { I18nPlugin, I18nPluginV2, RegisterPluginOptions } from "../plugins.js";
+// 插件合同 v2（3.2.0 起，501 G1）+ 能力词汇表（3.3.0 起，501 G3——技能包同源）
+export {
+  definePlugin, DEFAULT_PLUGIN_PRIORITY,
+  CAPABILITY_VOCABULARY, unknownCapabilities
+} from "../plugins.js";
+export type { I18nPlugin, I18nPluginV2, RegisterPluginOptions, Capability } from "../plugins.js";
 
 // 术语表（3.2.0 起，501 G2——与 MCP glossary_lookup 同源）
 export { Glossary } from "../glossary.js";

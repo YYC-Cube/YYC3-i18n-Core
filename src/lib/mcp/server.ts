@@ -240,6 +240,11 @@ export type { StreamableHttpTransportConfig } from "./streamable-http-transport.
 export { registerI18nTools } from "./i18n-tools.js";
 export type { RegisterI18nToolsOptions } from "./i18n-tools.js";
 
+// 3.3.0：编程调用面聚合（501 G3——技能脚本直连入口，随建随聚合）
+export { createI18nToolkit, toolNamesForCapability } from "./toolkit.js";
+export type { I18nToolkit, I18nToolkitOptions } from "./toolkit.js";
+export { buildI18nTools } from "./i18n-tools.js";
+
 // ============================================================
 // End of server.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元

@@ -32,10 +32,11 @@ export type { CacheConfig, CacheStats } from "./lib/cache.js";
 
 // Plugin System
 export {
-  PluginManager, definePlugin, DEFAULT_PLUGIN_PRIORITY
+  PluginManager, definePlugin, DEFAULT_PLUGIN_PRIORITY,
+  CAPABILITY_VOCABULARY, unknownCapabilities
 } from "./lib/plugins.js";
 export type {
-  I18nContext, I18nPlugin, I18nPluginV2, RegisterPluginOptions
+  I18nContext, I18nPlugin, I18nPluginV2, RegisterPluginOptions, Capability
 } from "./lib/plugins.js";
 
 // Built-in Plugins (from plugins/index.ts)
@@ -71,6 +72,8 @@ export type { HorizontalAlignment, Locale, RTLLocale, SpacingProperty, TextDirec
 // ============================================================
 
 export { registerI18nTools } from "./lib/mcp/i18n-tools.js";
+export { createI18nToolkit, toolNamesForCapability } from "./lib/mcp/toolkit.js";
+export type { I18nToolkit, I18nToolkitOptions } from "./lib/mcp/toolkit.js";
 export { MCPServer } from "./lib/mcp/server.js";
 export type { ToolHandler } from "./lib/mcp/server.js";
 export type {

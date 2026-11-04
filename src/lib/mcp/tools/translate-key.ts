@@ -40,6 +40,10 @@ export function createTranslateKeyTool({ engine }: ToolDeps): ToolDefinition {
     handler: async (args) => {
       const key = String(args.key);
       const params = args.params as Record<string, string> | undefined;
+      // 3.3.0：兑现 schema 声明的可选 locale（此前声明了但未消费，按当前语言返回）
+      if (typeof args.locale === "string" && args.locale && args.locale !== engine.getLocale()) {
+        await engine.setLocale(args.locale as never);
+      }
       const result = engine.t(key, params);
 
       return {

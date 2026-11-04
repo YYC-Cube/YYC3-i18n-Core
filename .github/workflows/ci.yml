@@ -51,11 +51,11 @@ jobs:
       - name: Header/footer uniformity gate
         run: pnpm audit:headers
 
-      - name: Test with coverage
-        run: pnpm test:coverage
-
       - name: Build (root first, then workspace packages)
         run: pnpm build && pnpm --filter @yyc3/i18n-react build
+
+      - name: Test with coverage (skills 脚本冒烟依赖 dist——build 前置于此)
+        run: pnpm test:coverage
 
       - name: Exports contract gate (zero-deps + artifacts, post-build)
         run: pnpm audit:contract

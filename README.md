@@ -670,37 +670,44 @@ console.log(quality.issues);    // [] (无问题)
 
 ### 6. MCP Server (`@yyc3/i18n-core/mcp`)
 
-Model Context Protocol 服务端，让 AI Agent 直接使用 i18n 工具。
+Model Context Protocol 服务端，让 AI Agent 直接使用 i18n 工具（stdio + Streamable HTTP 双传输）。
 
 ```typescript
-import {
-  MCPServer,
-  registerI18nTools,
-  StdioTransport,
-} from '@yyc3/i18n-core/mcp';
+import { I18nEngine } from '@yyc3/i18n-core';
+import { MCPServer, registerI18nTools } from '@yyc3/i18n-core/mcp';
+import { StdioTransport } from '@yyc3/i18n-core/node';
 
-// 创建 MCP Server
+const engine = new I18nEngine({ locale: 'en' });
+
+// 创建 MCP Server 并注册 13 个 i18n 工具 + Resources
 const server = new MCPServer({
   name: 'yyc3-i18n-tools',
-  version: '3.0.2',
+  version: '3.3.0',
   transport: new StdioTransport(),
 });
-
-// 注册 7 个 i18n 工具
-registerI18nTools(server);
+registerI18nTools(server, engine);
 
 // 启动服务
 await server.start();
 console.log('MCP Server running...');
 
-// 可用工具:
-// 1. search_translations    - 搜索翻译
-// 2. add_translation_key    - 添加翻译键
-// 3. translate_key          - 翻译单个键
-// 4. check_missing_keys     - 检查缺失键
-// 5. get_locale_stats       - 获取语言统计
-// 6. set_locale             - 设置当前语言
-// 7. quality_report         - 翻译质量报告
+// 可用工具（13）:
+//  1. search_translations   2. add_translation_key  3. translate_key
+//  4. check_missing_keys    5. get_locale_stats     6. set_locale
+//  7. quality_report        8. extract_keys         9. compare_locales
+// 10. quality_score        11. auto_fix_icu        12. export_formats
+// 13. glossary_lookup
+// Resources: locales://{locale} / coverage://report
+```
+
+**不经传输层直连**（技能脚本与宿主嵌入用法）：
+
+```typescript
+import { I18nEngine, createI18nToolkit } from '@yyc3/i18n-core';
+
+const toolkit = createI18nToolkit(new I18nEngine({ locale: 'en' }));
+const { keys } = await toolkit.call('extract_keys', { code: "t('nav.title')" });
+// → { keys: ['nav.title'], count: 1, unique: true }
 ```
 
 #### MCP 工具详情
@@ -708,12 +715,40 @@ console.log('MCP Server running...');
 | 工具名 | 功能 | 参数 |
 | -------- | ------ | ------ |
 | `search_translations` | 搜索翻译内容 | query, locale, limit |
-| `add_translation_key` | 添加新翻译键 | key, translations |
-| `translate_key` | 翻译指定键 | key, targetLocale |
+| `add_translation_key` | 添加新翻译键 | key, value, locale |
+| `translate_key` | 翻译指定键 | key, locale?, params? |
 | `check_missing_keys` | 检查缺失的翻译键 | locale |
+| `compare_locales` | 双语言键差异矩阵 | localeA, localeB |
 | `get_locale_stats` | 获取语言统计信息 | - |
 | `set_locale` | 设置当前语言 | locale |
+| `quality_score` | 翻译对评分（百分制） | sourceText, translatedText, sourceLocale, targetLocale |
 | `quality_report` | 生成质量报告 | locale |
+| `extract_keys` | 源码 t() 键提取 | code, unique? |
+| `auto_fix_icu` | ICU 诊断与修复建议 | template |
+| `export_formats` | 多格式导出 | locale, format? |
+| `glossary_lookup` | 术语表查询 | mode, term?/locale? |
+
+---
+
+### 6.5 Skill Matrix (`skills/` — 501 G3)
+
+**插件 × MCP × 技能三位一体**：能力层一比一暴露为协议层（13 工具），再一比一描述为认知层（技能包）。npm 包随附 6 个技能包（`node_modules/@yyc3/i18n-core/skills/`），供 Claude Code / Codex / Cursor 等 Agent 工具直接消费。
+
+| 技能包 | 触发场景 | 入口 |
+| ------ | ------ | ------ |
+| `i18n-extract` | 提取翻译键 | `extract_keys` / `scripts/extract.mjs` |
+| `i18n-audit` | 覆盖率与缺失审计 | `check_missing_keys` + `compare_locales` / `scripts/audit.mjs` |
+| `i18n-translate` | 翻译与键登记 | `translate_key` / `scripts/translate.mjs` |
+| `i18n-quality` | 质量评估与术语合规 | `quality_score` / `scripts/quality.mjs` |
+| `i18n-icu` | ICU 修复 | `auto_fix_icu` / `scripts/icu-fix.mjs` |
+| `i18n-setup` | 项目接入脚手架 | `scripts/setup.mjs`（+ `yyc3 i18n init`） |
+
+```bash
+# 技能脚本直连示例（薄封装经 createI18nToolkit，不经 MCP 传输层）
+node node_modules/@yyc3/i18n-core/skills/i18n-extract/scripts/extract.mjs src/**/*.ts
+```
+
+技能包规范：SKILL.md 双 front matter（agentskills.io 开放规范 + YYC³ 扩展）、正文 < 5000 tokens、`capability` ⊆ `CAPABILITY_VOCABULARY`（与插件 `meta.capability` 同词汇表）；由 `src/test/skills.test.ts` 合同测试与 YYC3-CLI `yyc3 skills validate` 双侧校验。
 
 ---
 

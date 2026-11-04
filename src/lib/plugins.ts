@@ -63,6 +63,33 @@ export type I18nPluginV2 = I18nPlugin & {
   meta?: { capability: readonly string[] };
 };
 
+/**
+ * 能力词汇表（501 G1 定、G3 落地）：插件 meta.capability 与技能包 SKILL.md
+ * front matter `capability` 字段的单一事实源。冻结防篡改；新增能力须同步
+ * 本表与对应 MCP 工具/技能（tests/skills 保护一致性）。
+ */
+export const CAPABILITY_VOCABULARY = Object.freeze([
+  'extract',      // 翻译键提取（extract_keys 工具 / i18n-extract 技能）
+  'audit',        // 覆盖率与缺失审计（check_missing_keys、compare_locales / i18n-audit）
+  'translate',    // 翻译执行（translate_key、add_translation_key / i18n-translate）
+  'quality',      // 翻译质量评估（quality_score、quality_report / i18n-quality）
+  'icu',          // ICU 消息修复（auto_fix_icu / i18n-icu）
+  'setup',        // 项目接入初始化（i18n-setup 技能）
+  'export',       // 多格式语言包导出（export_formats 工具）
+  'glossary',     // 术语表（Glossary 插件 + glossary_lookup 工具同源）
+  'reporting',    // 缺失键上报（MissingKeyReporter 插件）
+  'performance',  // 性能追踪（PerformanceTracker 插件）
+  'logging',      // 控制台日志（console-logger）
+] as const);
+
+export type Capability = (typeof CAPABILITY_VOCABULARY)[number];
+
+/** 校验 capability 列表是否全部在词汇表内；返回非法项（空数组即合法）。 */
+export function unknownCapabilities(capabilities: readonly string[]): string[] {
+  const known = new Set<string>(CAPABILITY_VOCABULARY);
+  return [...new Set(capabilities)].filter((c) => !known.has(c));
+}
+
 /** 插件注册选项（v2）。 */
 export interface RegisterPluginOptions {
   /** 钩子执行优先级，默认 DEFAULT_PLUGIN_PRIORITY；小者先执行，同值保持注册序 */

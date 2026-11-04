@@ -46,9 +46,12 @@ export interface RegisterI18nToolsOptions {
   glossary?: Glossary;
 }
 
-export function registerI18nTools(server: MCPServer, engine: I18nEngine, options: RegisterI18nToolsOptions = {}): void {
-  const deps: ToolDeps = { engine, glossary: options.glossary };
-  const tools: ToolDefinition[] = [
+/**
+ * 构造全部 13 个 i18n 工具定义——registerI18nTools（MCP 面）与
+ * createI18nToolkit（编程面）的单一事实源（501 G3）。
+ */
+export function buildI18nTools(deps: ToolDeps): ToolDefinition[] {
+  return [
     // 存量 7 工具（行为保持，tests/mcp 保护）
     createSearchTranslationsTool(deps),
     createAddTranslationKeyTool(deps),
@@ -65,8 +68,12 @@ export function registerI18nTools(server: MCPServer, engine: I18nEngine, options
     createExportFormatsTool(deps),
     createGlossaryLookupTool(deps),
   ];
+}
 
-  for (const { tool, handler } of tools) {
+export function registerI18nTools(server: MCPServer, engine: I18nEngine, options: RegisterI18nToolsOptions = {}): void {
+  const deps: ToolDeps = { engine, glossary: options.glossary };
+
+  for (const { tool, handler } of buildI18nTools(deps)) {
     server.registerTool(tool, handler);
   }
 

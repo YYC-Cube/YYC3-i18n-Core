@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.3.0] - 2026-11-05
+
+501 方案 **G3 技能矩阵**：插件 × MCP × 技能三位一体落地——能力层（`src/lib/`）一比一暴露为协议层（13 工具），再一比一描述为认知层（技能包）。
+
+### 🚀 新增
+
+- **技能矩阵 6 包（`skills/`，随 npm 包发布）**：`i18n-extract` / `i18n-audit` / `i18n-translate` / `i18n-quality` / `i18n-icu` / `i18n-setup`——每包含 SKILL.md（agentskills.io 开放规范 front matter + YYC³ 扩展字段，正文 < 5000 tokens）与 `scripts/*.mjs` 薄封装（可执行脚本优先于长流程描述）
+- **`createI18nToolkit(engine, options?)` 编程调用面**（主入口 + `./mcp` 双聚合）：13 工具不经传输层直连调用（技能脚本与宿主嵌入共用）；配套 `toolNamesForCapability(capability)` 能力→工具发现映射
+- **`CAPABILITY_VOCABULARY` 冻结能力词汇表**（11 词条，主入口 + `./plugins` 双聚合）+ `unknownCapabilities()` 校验：插件 `meta.capability` 与 SKILL.md `capability` 字段单一事实源（G1 合同的 G3 闭环）
+- **技能包合同测试**（`src/test/skills.test.ts`）：front matter 双合同、词汇表一致性、工具名存在性、token 预算、六脚本端到端冒烟（dist 自省新鲜度，CI 已前置 build）；toolkit 单测 12 用例
+
+### 🔧 修复
+
+- **`translate_key` 兑现 `locale` 参数**：schema 自 3.2.0 起声明可选 `locale` 但 handler 未消费（按引擎当前语言返回）——现显式切换后再取译文，技能脚本按语言取值的前提成立
+
+### 📦 打包与文档
+
+- `files` 白名单 + `skills/`（tarball 随包分发技能矩阵）
+- README：MCP 节由 7 工具时代刷新为 13 工具 + Streamable HTTP（并修正 `registerI18nTools(server)` 示例缺 engine 参数的漂移）；新增技能矩阵节
+- CI 顺序修正：`build` 前置于 `test:coverage`（技能脚本冒烟依赖 dist 发布布局）
+
+### 🧪 复测总账
+
+787 测试全绿（新增 25）；覆盖率 96.65/90.13/97.17/97.63（分支门禁 90 保持）；lint 0 / 契约 0 违规 / 标头标尾 147+273 全绿
+
+---
+
 ## [3.1.0] - 2026-11-04
 
 生产闭环审查（17 项发现全闭环 + 修复中新发现 4 项缺陷）后的版本，报告见 `docs/04-YYC3-项目测试-审核阶段/`。
