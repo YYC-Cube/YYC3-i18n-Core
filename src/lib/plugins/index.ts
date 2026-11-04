@@ -42,6 +42,10 @@ export type { I18nPlugin, I18nPluginV2, RegisterPluginOptions, Capability } from
 export { Glossary } from "../glossary.js";
 export type { GlossaryEntry, GlossaryViolation, GlossaryCheckResult } from "../glossary.js";
 
+// 企业审计日志（3.4.0 起，501 G4——五钩子审计 + 参数脱敏 + 环形缓冲）
+export { AuditLogger } from "./audit-logger.js";
+export type { AuditEntry, AuditEventType, AuditLoggerConfig } from "./audit-logger.js";
+
 // ============================================================
 // End of index.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元

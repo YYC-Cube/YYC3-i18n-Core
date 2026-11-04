@@ -60,6 +60,7 @@ const CAPABILITY_TOOLS: Readonly<Record<Capability, readonly string[]>> = Object
   reporting: Object.freeze([]),
   performance: Object.freeze([]),
   logging: Object.freeze([]),
+  "audit-trail": Object.freeze([]),
 });
 
 /** 查询能力对应的 MCP 工具名（不在词汇表的能力抛错——词汇表即合同）。 */

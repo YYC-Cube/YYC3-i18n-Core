@@ -29,6 +29,7 @@ export default defineConfig([
       'lib/icu/parser': 'src/lib/icu/parser.ts',
       'lib/ai/provider': 'src/lib/ai/provider.ts',
       'lib/mcp/server': 'src/lib/mcp/server.ts',
+      'lib/ota/index': 'src/lib/ota/index.ts',
       'node': 'src/node.ts',
     },
     format: ['esm'],

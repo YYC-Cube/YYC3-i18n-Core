@@ -25,6 +25,8 @@
  */
 import type { I18nEngine } from "../engine.js";
 import type { Glossary } from "../glossary.js";
+import type { RemoteLocaleSource } from "../ota/index.js";
+import type { Locale } from "../types.js";
 import type { MCPServer } from "./server.js";
 import { createAddTranslationKeyTool } from "./tools/add-translation-key.js";
 import { createAutoFixIcuTool } from "./tools/auto-fix-icu.js";
@@ -44,6 +46,10 @@ import { createTranslateKeyTool } from "./tools/translate-key.js";
 export interface RegisterI18nToolsOptions {
   /** 术语表注入后启用 glossary_lookup 工具的完整查询能力 */
   glossary?: Glossary;
+  /** OTA 远程源注入后启用 ota://status 只读资源（501 G4） */
+  otaSources?: RemoteLocaleSource[];
+  /** ota://status 需展示的 locale 清单（默认全部已装载语言）。 */
+  otaLocales?: Locale[];
 }
 
 /**
@@ -77,20 +83,34 @@ export function registerI18nTools(server: MCPServer, engine: I18nEngine, options
     server.registerTool(tool, handler);
   }
 
-  registerI18nResources(server, engine);
+  registerI18nResources(server, engine, options);
 }
 
 /**
- * Resources 面（501 G2.4）：locales://{locale} 语言包只读资源 +
- * coverage://report 覆盖率快照。模板 URI 经 provider 动态读取。
+ * Resources 面（501 G2.4 + G4）：locales://{locale} 语言包只读资源 +
+ * coverage://report 覆盖率快照 + ota://status OTA 同步状态（注入 otaSources 时）。
+ * 模板 URI 经 provider 动态读取。
  */
-function registerI18nResources(server: MCPServer, engine: I18nEngine): void {
+function registerI18nResources(server: MCPServer, engine: I18nEngine, options: RegisterI18nToolsOptions): void {
   server.registerResource({ uri: "locales://{locale}", name: "Locale translations", description: "Read-only translations of a loaded locale", mimeType: "application/json" });
   server.registerResource({ uri: "coverage://report", name: "Coverage report", description: "Missing-key snapshot of all loaded locales", mimeType: "application/json" });
+  const hasOta = (options.otaSources?.length ?? 0) > 0;
+  if (hasOta) {
+    server.registerResource({ uri: "ota://status", name: "OTA sync status", description: "Last remote locale sync result per locale", mimeType: "application/json" });
+  }
 
   server.registerResourceProvider({
-    canRead: (uri) => uri.startsWith("locales://") || uri === "coverage://report",
+    canRead: (uri) => uri.startsWith("locales://") || uri === "coverage://report" || (hasOta && uri === "ota://status"),
     read: async (uri) => {
+      if (uri === "ota://status") {
+        const locales = options.otaLocales ?? engine.getStats().loadedLocales;
+        const sources = options.otaSources ?? [];
+        const perLocale = locales.map((locale) => ({
+          locale,
+          syncs: sources.map((source) => source.lastSync(locale as never)),
+        }));
+        return { text: JSON.stringify({ perLocale }, null, 2) };
+      }
       if (uri === "coverage://report") {
         const stats = engine.getStats();
         const sourceFlat = flattenAll(engine.getTranslations(stats.locale as never));

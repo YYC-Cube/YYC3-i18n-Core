@@ -752,6 +752,38 @@ node node_modules/@yyc3/i18n-core/skills/i18n-extract/scripts/extract.mjs src/**
 
 ---
 
+### 6.6 OTA Remote Locales + Enterprise Audit (`@yyc3/i18n-core/ota` — 501 G4)
+
+**OTA 语言包热更新**——远程源 ETag 协商拉取，200 即热更新进引擎（订阅者即时生效），304 零开销跳过；零依赖（原生 fetch）：
+
+```typescript
+import { createRemoteLocaleSource, startRemoteLocalePolling } from '@yyc3/i18n-core/ota';
+
+const source = createRemoteLocaleSource({
+  url: 'https://cdn.example.com/locales/{locale}.json', // {locale} 占位，一源多语言
+  headers: { authorization: 'Bearer ...' },             // 认证头（仅 http/https 协议）
+});
+
+await source.sync(engine, 'ja');       // → { changed: true, version, keyCount } 并 registerTranslation
+startRemoteLocalePolling(source, engine, 'ja', 60_000); // 轮询热更新；返回 { stop() }
+```
+
+版本协商优先级：`x-i18n-version` 响应头 → 载荷 `{ translations, version }` 的 `version` → `ETag`。同步状态可经 MCP 资源 `ota://status` 只读暴露（`registerI18nTools(server, engine, { otaSources: [source] })`）。
+
+**企业审计日志插件**——五钩子全审计（translate/missing/error/locale-change/lifecycle），参数键脱敏（`password/token/secret/authorization/apikey`）+ 环形缓冲 + SIEM sink：
+
+```typescript
+import { AuditLogger } from '@yyc3/i18n-core';
+
+const audit = new AuditLogger({ sink: (entry) => shipToSIEM(entry), bufferSize: 1000 });
+engine.plugins.register(audit);
+audit.exportJSON(); // { entries, count }——时间升序快照
+```
+
+审计语义两条：`afterTranslate` 记录插值前目录模板（终端用户 PII 只出现在脱敏后 params，审计面 PII 安全）；引擎缓存命中短路钩子链——同 `(locale:key)` 仅首次解析被审计，全量请求审计需关闭缓存。`capability: ['audit-trail']`（词汇表第 12 词条）。
+
+---
+
 ### 7. RTL Support (`@yyc3/i18n-core` — 内置)
 
 RTL (Right-to-Left) 语言的原生支持。

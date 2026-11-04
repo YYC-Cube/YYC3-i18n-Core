@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.0] - 2026-11-05
+
+501 方案 **G4 平台化第一增量**（OTA 热更新 + 企业审计 + 协议面暴露）；Dashboard（@yyc3/i18n-dashboard React 包）定位 G4.2 后续增量。
+
+### 🚀 新增
+
+- **OTA 远程语言包源（`./ota` 子路径 + 主入口双聚合）**：`createRemoteLocaleSource`（fetch + ETag/If-None-Match 协商；版本优先级 x-i18n-version 头 → 载荷 version → ETag；仅 http/https；AbortController 超时；fetchImpl 可注入）+ `startRemoteLocalePolling`（轮询热更新，错误经 onError 上报绝不冒泡进定时器）；200 即 `registerTranslation` 热更新（订阅者即时生效）、304 零开销跳过——零依赖（原生 fetch）
+- **企业审计日志插件 `AuditLogger`**：五钩子全审计（translate/missing/error/locale-change/lifecycle）+ 参数键脱敏（password/token/secret/authorization/apikey，大小写不敏感）+ 值截断 + 环形缓冲（默认 500）+ SIEM sink 回调；审计语义两条入文档——afterTranslate 记录插值前模板（PII 只在脱敏 params，审计面 PII 安全）、缓存命中短路钩子链（同 locale:key 仅首次解析被审计）
+- **MCP 资源 `ota://status`**：`registerI18nTools` 新增可选 `otaSources`/`otaLocales` 注入——各 locale 最近同步结果只读暴露（缺省不声明，面零变化）
+- **`CAPABILITY_VOCABULARY` 第 12 词条 `audit-trail`**（插件层能力，无工具映射）
+
+### 🧪 复测总账
+
+810 测试全绿（新增 23：OTA 12 + 审计 9 + ota://status 2）；覆盖率 96.55/90.36/96.69/97.51（分支门禁 90 保持）；lint 0 / 契约 0 违规 / 标头标尾全绿
+
+---
+
 ## [3.3.0] - 2026-11-05
 
 501 方案 **G3 技能矩阵**：插件 × MCP × 技能三位一体落地——能力层（`src/lib/`）一比一暴露为协议层（13 工具），再一比一描述为认知层（技能包）。

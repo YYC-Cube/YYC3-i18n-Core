@@ -80,6 +80,7 @@ export const CAPABILITY_VOCABULARY = Object.freeze([
   'reporting',    // 缺失键上报（MissingKeyReporter 插件）
   'performance',  // 性能追踪（PerformanceTracker 插件）
   'logging',      // 控制台日志（console-logger）
+  'audit-trail',  // 企业审计日志（AuditLogger 插件，501 G4）
 ] as const);
 
 export type Capability = (typeof CAPABILITY_VOCABULARY)[number];

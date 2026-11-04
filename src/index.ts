@@ -43,10 +43,11 @@ export type {
 export {
   MissingKeyReporter,
   PerformanceTracker, createConsoleLogger,
-  Glossary
+  Glossary, AuditLogger
 } from "./lib/plugins/index.js";
 export type {
-  GlossaryEntry, GlossaryViolation, GlossaryCheckResult
+  GlossaryEntry, GlossaryViolation, GlossaryCheckResult,
+  AuditEntry, AuditEventType, AuditLoggerConfig
 } from "./lib/plugins/index.js";
 
 // Formatter utilities
@@ -180,6 +181,16 @@ export type { FormatRelativeTimestampOptions, FormatTimeAgoOptions } from "./lib
 
 // Path Guards / JSON File Operations —— Node 专属（node:fs/node:path 运行时依赖），
 // 已迁移至 ./node 子路径（见 src/node.ts），主入口保持浏览器类型友好
+
+// ============================================================
+// OTA Remote Locales (501 G4 — fetch + ETag 协商 + 轮询热更新)
+// ============================================================
+
+export { createRemoteLocaleSource, startRemoteLocalePolling } from "./lib/ota/index.js";
+export type {
+  PollingHandle, RemoteLocalePayload, RemoteLocaleSource,
+  RemoteLocaleSourceConfig, RemoteSyncResult
+} from "./lib/ota/index.js";
 
 // ============================================================
 // End of index.ts | YYC³（YanYuCloudCube™ · 注册商标）

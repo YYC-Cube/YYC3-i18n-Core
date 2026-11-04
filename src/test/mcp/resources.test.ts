@@ -24,6 +24,7 @@ import { describe, expect, it } from "vitest";
 import { I18nEngine } from "../../lib/engine.js";
 import { MCPServer } from "../../lib/mcp/server.js";
 import { registerI18nTools } from "../../lib/mcp/i18n-tools.js";
+import { createRemoteLocaleSource } from "../../lib/ota/remote-locale.js";
 
 /** 捕获型 transport：记录 send 输出，允许测试侧注入消息。 */
 class CapturingTransport {
@@ -110,6 +111,46 @@ describe("MCP Resources — coverage://report", () => {
     const zh = payload.perLocale.find((p: any) => p.locale === "zh-CN");
     expect(zh).toBeDefined();
     expect(zh.missingCount).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("MCP Resources — ota://status（501 G4）", () => {
+  it("未注入 otaSources 时不声明资源（缺省面不变）", () => {
+    const { server } = makeServer();
+    expect(server.getResources().map((r) => r.uri)).not.toContain("ota://status");
+  });
+
+  it("注入后声明并返回各 locale 同步状态（null=未同步）", async () => {
+    const engine = new I18nEngine({ locale: "en" });
+    engine.registerTranslation("en", {});
+    engine.registerTranslation("zh-CN", { nav: { home: "首页" } });
+    const transport = new CapturingTransport();
+    const server = new MCPServer({ name: "t", version: "1", transport: transport as never });
+
+    let etag: string | null = null;
+    const fetchImpl = (async (url: string | URL | Request, init?: RequestInit) => {
+      const headers = (init?.headers ?? {}) as Record<string, string>;
+      if (headers["If-None-Match"] === '"v9"') return new Response(null, { status: 304 });
+      etag = '"v9"';
+      return new Response(JSON.stringify({ nav: { home: "首页 v9" } }), { status: 200, headers: { etag: '"v9"' } });
+    }) as unknown as typeof fetch;
+
+    const source = createRemoteLocaleSource({ url: "https://cdn.test/{locale}.json", fetchImpl });
+    await source.sync(engine, "zh-CN"); // 一次真实同步 → changed:true
+    await source.sync(engine, "zh-CN"); // 304 → changed:false
+
+    registerI18nTools(server, engine, { otaSources: [source], otaLocales: ["zh-CN", "ja"] });
+    await server.start();
+    const id = 1;
+    transport.emit({ jsonrpc: "2.0", id, method: "resources/read", params: { uri: "ota://status" } });
+    await new Promise((r) => setTimeout(r, 5));
+    const payload = JSON.parse(transport.lastResponse(id).result.contents[0].text);
+
+    expect(payload.perLocale).toHaveLength(2);
+    const zh = payload.perLocale.find((p: any) => p.locale === "zh-CN");
+    expect(zh.syncs[0]).toMatchObject({ changed: false, version: '"v9"', keyCount: 1 });
+    const ja = payload.perLocale.find((p: any) => p.locale === "ja");
+    expect(ja.syncs[0]).toBeNull(); // 从未同步
   });
 });
 
