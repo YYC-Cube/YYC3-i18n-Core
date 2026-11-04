@@ -30,6 +30,7 @@ export default defineConfig([
       'lib/ai/provider': 'src/lib/ai/provider.ts',
       'lib/mcp/server': 'src/lib/mcp/server.ts',
       'lib/ota/index': 'src/lib/ota/index.ts',
+      'lib/workflow/index': 'src/lib/workflow/index.ts',
       'node': 'src/node.ts',
     },
     format: ['esm'],

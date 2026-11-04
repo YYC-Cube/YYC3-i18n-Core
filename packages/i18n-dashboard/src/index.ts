@@ -35,6 +35,10 @@ export {
 } from "./panels.js";
 export type { PanelProps } from "./panels.js";
 
+// 翻译工作流面板（0.2.0 起，502 方案）
+export { WorkflowPanel, useWorkflowQueue } from "./workflow-panel.js";
+export type { WorkflowPanelEntry, WorkflowPanelProps } from "./workflow-panel.js";
+
 // ============================================================
 // End of index.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元

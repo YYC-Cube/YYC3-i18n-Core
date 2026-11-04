@@ -1,6 +1,6 @@
 {
   "name": "@yyc3/i18n-core",
-  "version": "3.4.1",
+  "version": "3.5.0",
   "description": "🌐 YYC³ Production-Ready Internationalization (i18n) Framework - High-performance, plugin-based, zero-dependency i18n solution for TypeScript/JavaScript applications",
   "keywords": [
     "i18n",
@@ -73,6 +73,10 @@
     "./ota": {
       "import": "./dist/lib/ota/index.js",
       "types": "./dist/lib/ota/index.d.ts"
+    },
+    "./workflow": {
+      "import": "./dist/lib/workflow/index.js",
+      "types": "./dist/lib/workflow/index.d.ts"
     },
     "./node": {
       "import": "./dist/node.js",

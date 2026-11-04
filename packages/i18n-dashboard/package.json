@@ -1,6 +1,6 @@
 {
   "name": "@yyc3/i18n-dashboard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Health dashboard React components for @yyc3/i18n-core — performance, coverage, OTA sync and audit panels",
   "keywords": [
     "i18n",

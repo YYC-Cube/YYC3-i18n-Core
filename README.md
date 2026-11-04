@@ -754,7 +754,7 @@ node node_modules/@yyc3/i18n-core/skills/i18n-extract/scripts/extract.mjs src/**
 
 ### 6.6 OTA Remote Locales + Enterprise Audit (`@yyc3/i18n-core/ota` — 501 G4)
 
-**OTA 语言包热更新**——远程源 ETag 协商拉取，200 即热更新进引擎（订阅者即时生效），304 零开销跳过；零依赖（原生 fetch）：
+**OTA 语言包热更新**——远程源 ETag 协商拉取，200 即热更新进引擎（下次 `t()` 读取即新值），304 零开销跳过；零依赖（原生 fetch）：
 
 ```typescript
 import { createRemoteLocaleSource, startRemoteLocalePolling } from '@yyc3/i18n-core/ota';
@@ -781,6 +781,32 @@ audit.exportJSON(); // { entries, count }——时间升序快照
 ```
 
 审计语义两条：`afterTranslate` 记录插值前目录模板（终端用户 PII 只出现在脱敏后 params，审计面 PII 安全）；引擎缓存命中短路钩子链——同 `(locale:key)` 仅首次解析被审计，全量请求审计需关闭缓存。`capability: ['audit-trail']`（词汇表第 12 词条）。
+
+---
+
+### 6.7 SSO Translation Workflow (`@yyc3/i18n-core/workflow` — 502)
+
+**译者角色 × 审批链 × 身份抽象**——企业翻译协作工作流（502 方案独立立项）：
+
+```typescript
+import { TranslationWorkflow, StaticIdentityProvider, registerWorkflowTools } from '@yyc3/i18n-core/workflow';
+
+const workflow = new TranslationWorkflow({
+  engine,                                                    // publish 时热更新进引擎
+  identity: new StaticIdentityProvider({ 'tok-ada': { userId: 'ada', roles: ['translator'] } }),
+  onTransition: (t) => auditSink(t),                         // 流转外接审计
+});
+
+await workflow.submit({ locale: 'ja', key: 'nav.home', value: 'ホーム', actor: { token: 'tok-ada' } });
+await workflow.approve({ entryId: 1, actor: reviewerCtx, note: 'LGTM' });   // 或 IdentityContext 直传
+await workflow.publish({ entryId: 1, actor: adminCtx });                     // admin 专属
+```
+
+- **状态机**：`submitted → approved → published` 主链 + `rejected → resubmit`（可修订值）；越权抛 `WorkflowPermissionError`、非法转移抛 `WorkflowStateError`（均含上下文）
+- **权限矩阵**：translator 提交/修订 · reviewer 批/驳 · admin 发布（`ACTION_ROLES` 单一事实源）
+- **OIDC 验证**（`OidcIdentityProvider`）：JWKS 缓存 + RS256/ES256 `crypto.subtle` 验签 + `iss/aud/exp` 校验——零依赖；生产接 Keycloak/Auth0 只需 `jwksUri/issuer/audience` 三参
+- **MCP 选择性面**：`registerWorkflowTools(server, workflow)` 增 `workflow_submit/approve/reject/publish/list` 五工具（token 每调用现验；不接线则缺省 13 工具面不变）
+- 可视化：`@yyc3/i18n-dashboard` 0.2.0 的 `<WorkflowPanel entries={...}>` + `useWorkflowQueue(workflow)`
 
 ---
 

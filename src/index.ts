@@ -195,6 +195,25 @@ export type {
 } from "./lib/ota/index.js";
 
 // ============================================================
+// Translation Workflow (502 — SSO 翻译工作流：状态机/角色/身份抽象)
+// ============================================================
+
+export {
+  ACTION_ROLES, ACTION_SOURCE_STATE, isWorkflowRole,
+  isValidTransition, roleCanAction, targetStateOf,
+  TranslationWorkflow, WorkflowPermissionError, WorkflowStateError,
+  OidcIdentityError, OidcIdentityProvider, StaticIdentityProvider
+} from "./lib/workflow/index.js";
+export type {
+  ActorInput, EntryOpInput, IdentityContext, IdentityProvider,
+  OidcIdentityProviderConfig, PublishInput, SubmitInput,
+  TranslationWorkflowOptions, WorkflowAction, WorkflowEntry,
+  WorkflowRole, WorkflowState, WorkflowTransition
+} from "./lib/workflow/index.js";
+
+export { registerWorkflowTools } from "./lib/mcp/workflow-tools.js";
+
+// ============================================================
 // End of index.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元
 // All things converge in cloud pivot; Deep stacks ignite a new era of intelligence

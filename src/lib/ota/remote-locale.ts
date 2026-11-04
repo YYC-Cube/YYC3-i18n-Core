@@ -52,7 +52,7 @@ export interface RemoteSyncResult {
 }
 
 export interface RemoteLocaleSource {
-  /** 单次同步：协商拉取并热更新（registerTranslation → 订阅者即时生效）。 */
+  /** 单次同步：协商拉取并热更新（registerTranslation → 下次 t() 读取即新值）。 */
   sync(engine: I18nEngine, locale: Locale): Promise<RemoteSyncResult>;
   /** 指定 locale 最近一次同步结果（未同步过为 null）。 */
   lastSync(locale: Locale): RemoteSyncResult | null;

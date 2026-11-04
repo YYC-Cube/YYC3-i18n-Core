@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.5.0] - 2026-11-05
+
+502 方案 **SSO 翻译工作流**（501 G4 遗留项独立立项收官）：译者角色 × 审批链 × 身份抽象——方案文档 `docs/05-.../502-YYC3-i18n-SSO翻译工作流方案.md`。
+
+### 🚀 新增
+
+- **工作流状态机 + `TranslationWorkflow` 服务（`./workflow` 子路径 + 主入口双聚合）**：`submitted→approved→published` 主链 + `rejected→resubmit` 修订环；操作×角色权限矩阵单一事实源（`ACTION_ROLES`：translator 提交/修订、reviewer 批/驳、admin 发布）；每次流转追加轨迹（actor/roles/from→to/note），`onTransition` 回调外接审计；`publish` 桥接 `engine.registerTranslation` 热更新（下次 `t()` 即新值）
+- **身份抽象（SSO 衔接点）**：`IdentityProvider` 接口 + `StaticIdentityProvider`（token→身份静态映射，开发/测试）+ **`OidcIdentityProvider`**（OIDC 兼容 IdP：JWKS 拉取按 kid 缓存、RS256/ES256 验签走 `crypto.subtle` 原生、`iss`/`aud`/`exp`（含 60s 时钟偏移）声明校验、角色 claim 映射（数组或逗号串，非法角色静默丢弃）——零依赖守住红线；授权码流程属应用层，显式非目标）
+- **MCP 选择性工具面 `registerWorkflowTools(server, workflow)`**：`workflow_submit/approve/reject/publish/list` 五工具，token 每调用现验，错误经 `isError` 返回不抛传输层——**缺省 13 工具面零变化**（与 `ota://status` 同纪律）
+- **越权/非法状态确定性错误**：`WorkflowPermissionError`（附矩阵上下文）/`WorkflowStateError`
+
+### 📦 关联交付
+
+- **@yyc3/i18n-dashboard 0.2.0**：`WorkflowPanel` 审批队列面板（submitted/approved/rejected/published 四组 `data-group` 锚点）+ `useWorkflowQueue(workflow, refreshMs)` 轮询钩子
+- README OTA 节措辞修正：`registerTranslation` 热更新是「下次 `t()` 读取即新值」（引擎 subscribe 通知仅随 setLocale，G4.1 的「订阅者即时生效」表述不准）
+
+### 🧪 复测总账
+
+834 测试全绿（新增 24：工作流 13 + OIDC 8 + MCP 3）；覆盖率 96.73/**90.27**/97.04/97.62（分支门禁 90 保持）；OIDC 测试用真实密钥对签验（crypto.subtle 生成/签发，fetchImpl 桩零网络）；lint 0 / 契约 0 违规 / 标头标尾全绿
+
+---
+
 ## [3.4.1] - 2026-11-05
 
 G4.2（@yyc3/i18n-dashboard）消费需求驱动的类型导出面补齐（纯 additive，零运行时变更）。

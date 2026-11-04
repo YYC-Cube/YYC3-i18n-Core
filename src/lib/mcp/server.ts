@@ -245,6 +245,9 @@ export { createI18nToolkit, toolNamesForCapability } from "./toolkit.js";
 export type { I18nToolkit, I18nToolkitOptions } from "./toolkit.js";
 export { buildI18nTools } from "./i18n-tools.js";
 
+// 3.5.0：工作流选择性工具面聚合（502 W3——显式接线才注册，缺省 13 不变）
+export { registerWorkflowTools } from "./workflow-tools.js";
+
 // ============================================================
 // End of server.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元

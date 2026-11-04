@@ -41,6 +41,15 @@ engine.plugins.register(audit);
 
 `PerformancePanel` / `CoveragePanel` / `MissingKeysPanel` / `OtaPanel` / `AuditPanel` 均可脱离钩子单独消费（纯 props）。
 
+## 翻译工作流面板（0.2.0，502 方案）
+
+```tsx
+import { WorkflowPanel, useWorkflowQueue } from '@yyc3/i18n-dashboard';
+
+const entries = useWorkflowQueue(workflow, 5000);   // TranslationWorkflow 轮询（SSR 初始快照同步可得）
+<WorkflowPanel entries={entries} />                  // 待审/待发布/待修订/已生效 四组只读视图
+```
+
 ## API 一览
 
 | 导出 | 说明 |
@@ -48,6 +57,7 @@ engine.plugins.register(audit);
 | `useI18nHealth(engine, options?)` | 健康快照钩子：`{ locale, loadedLocales, subscriberCount, coverage, performance, missingKeys, audit, ota, collectedAt }`；刷新双通道 = `engine.subscribe` 事件 + `refreshMs` 轮询 |
 | `I18nHealthDashboard` | 组合根组件（五面板一屏） |
 | 五面板组件 | 纯展示；数据源未接入时渲染 `data-state="empty"` 空态 |
+| `WorkflowPanel` / `useWorkflowQueue`（0.2.0） | 审批队列四状态分组只读视图 / workflow 轮询钩子 |
 
 覆盖率语义与 MCP `coverage://report` 同源：以引擎当前语言为基线，目标语言按 `.` 扁平化比对。
 
