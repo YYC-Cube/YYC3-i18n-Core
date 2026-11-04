@@ -110,6 +110,20 @@ describe("plugins v2 — definePlugin factory contract", () => {
     expect(mgr.getRegisteredPlugins()).toHaveLength(0);
     expect(mgr.getPriority("z")).toBeUndefined();
   });
+
+  it("initAll 对无 init 钩子的插件安全跳过（initAll 分支）", async () => {
+    const mgr = new PluginManager();
+    const inited: string[] = [];
+    mgr.register(hookPlugin("no-init", []));
+    mgr.register({
+      name: "with-init",
+      init: () => {
+        inited.push("with-init");
+      },
+    });
+    await mgr.initAll({} as never);
+    expect(inited).toEqual(["with-init"]);
+  });
 });
 
 // ============================================================
