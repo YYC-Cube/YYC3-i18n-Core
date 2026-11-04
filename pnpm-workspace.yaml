@@ -8,3 +8,6 @@ overrides:
   brace-expansion@<2: ">=1.1.18"
   brace-expansion@>=2: ">=5.0.12"
   esbuild: ">=0.28.1"
+  source-map-js: ">=1.2.2"
+  minimatch@<11: ">=11.0.1"
+  "@vitest/mocker": ">=4.1.12"
