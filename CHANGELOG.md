@@ -39,7 +39,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [3.2.3] - 2026-11-05
+
+### 🔧 修复
+
+- **`registerI18nTools` 未从 `./mcp` 子路径导出（同类遗漏第二次发现）**：工具集注册入口现已随 `@yyc3/i18n-core/mcp` 聚合导出（含 `RegisterI18nToolsOptions` 类型）；确立守则——**新建公共模块必须同步聚合出口**
+
+---
+
+## [3.2.2] - 2026-11-05
+
+### 🔧 修复
+
+- **`StreamableHttpTransport` 未从 `./mcp` 子路径导出（3.2.1 registry 冒烟续发现）**：G2.5 交付物仅可经深层文件路径导入——`@yyc3/i18n-core/mcp` 现聚合导出 `StreamableHttpTransport` 及其配置类型；根入口待后续版本评估统一
+
+---
+
+## [3.2.1] - 2026-11-05
+
+### 🔧 修复
+
+- **导出面遗漏（3.2.0 发布后 registry 冒烟发现）**：`definePlugin` / `DEFAULT_PLUGIN_PRIORITY` / `I18nPluginV2` / `RegisterPluginOptions` / `Glossary` 及其类型**未进公共导出面**（G1/G2 交付物仅内部消费，外部无法构造注入）——现从主入口与 `./plugins` 子路径双通道导出；3.2.0 用户请升级
+
+---
+
+## [3.2.0] - 2026-11-04
 
 ### 🚀 新增（501 演进方案 G1/G2 生产落地，目标版本 3.2.0）
 

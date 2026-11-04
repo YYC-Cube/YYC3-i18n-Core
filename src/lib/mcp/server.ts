@@ -231,6 +231,15 @@ export class MCPServer {
   }
 }
 
+// 3.2.2：./mcp 子路径聚合出口——Streamable HTTP 传输随子路径直达（此前仅能从
+// 深层文件路径导入，registry 冒烟暴露的导出面遗漏）
+export { StreamableHttpTransport } from "./streamable-http-transport.js";
+export type { StreamableHttpTransportConfig } from "./streamable-http-transport.js";
+
+// 3.2.3：工具集聚合出口补齐（同类遗漏第二次发现——新建公共模块必须同步聚合出口）
+export { registerI18nTools } from "./i18n-tools.js";
+export type { RegisterI18nToolsOptions } from "./i18n-tools.js";
+
 // ============================================================
 // End of server.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元

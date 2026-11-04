@@ -31,13 +31,21 @@ export { LRUCache } from "./lib/cache.js";
 export type { CacheConfig, CacheStats } from "./lib/cache.js";
 
 // Plugin System
-export { PluginManager } from "./lib/plugins.js";
-export type { I18nContext, I18nPlugin } from "./lib/plugins.js";
+export {
+  PluginManager, definePlugin, DEFAULT_PLUGIN_PRIORITY
+} from "./lib/plugins.js";
+export type {
+  I18nContext, I18nPlugin, I18nPluginV2, RegisterPluginOptions
+} from "./lib/plugins.js";
 
 // Built-in Plugins (from plugins/index.ts)
 export {
   MissingKeyReporter,
-  PerformanceTracker, createConsoleLogger
+  PerformanceTracker, createConsoleLogger,
+  Glossary
+} from "./lib/plugins/index.js";
+export type {
+  GlossaryEntry, GlossaryViolation, GlossaryCheckResult
 } from "./lib/plugins/index.js";
 
 // Formatter utilities
