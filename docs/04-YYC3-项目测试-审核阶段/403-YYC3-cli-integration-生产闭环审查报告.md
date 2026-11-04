@@ -3,7 +3,7 @@ file: 403-YYC3-cli-integration-生产闭环审查报告.md
 title: YYC³ cli-integration 生产闭环审查报告 — 加载门禁失败的 P0 缺陷
 description: YYC³ cli-integration（i18n-commands.js）审查 — 语法错误致模块不可加载的 P0 缺陷、路径校验缺失、README 绝对路径与功能不可达结论
 author: YYC³ Team <admin@0379.email>
-version: v1.1.0
+version: v1.2.0
 created: 2026-11-04
 updated: 2026-11-04
 status: stable
@@ -129,12 +129,29 @@ JSDoc **块注释内部**出现了 glob 模式 `src/**/*.{ts,tsx}`，其中 `**/
 
 ---
 
+## 六、v1.2.0 YYC3-CLI 侧集成验证（2026-11-04 实测）
+
+集成方式采用**单一事实源**：YYC3-CLI 以 `file:../YYC3-i18n-Core/packages/cli-integration` 依赖引入模块，`lib/i18n.js` 为薄适配层（杜绝跨仓复制漂移），`bin/yyc3-cli.js` 注册 `yyc3 i18n` 命令组。
+
+| 验证项 | 结果 |
+| ---- | ---- |
+| `yyc3 i18n --help` 三命令注册 | ✅ |
+| `yyc3 i18n init . --locales en,zh-CN,ja --react` | ✅ 生成 3 语言 JSON + src/lib/i18n.ts 引擎配置 |
+| `yyc3 i18n extract "src/**/*.tsx"` | ✅ 精确提取 2 键（common.save / nav.home） |
+| `yyc3 i18n audit src/locales --output report.json` | ✅ 三语言 100% 覆盖报告落盘 |
+| 端到端产物四件套（locales/i18n.ts/keys/report） | ✅ 全部存在 |
+
+**终态评级：A− → A**（宿主集成验证完成；遗留项清零）。对应提交：YYC3-CLI `feat(cli): 集成 yyc3 i18n 命令组`。
+
+---
+
 ## 变更历史
 
 | 版本 | 日期 | 变更内容 | 作者 |
 | ---- | ---- | -------- | ---- |
 | v1.0.0 | 2026-11-04 | 首次发布：cli-integration 审查（P0 语法错误定位、0/3 函数可达、Mimosa 交叉证据、6 项发现） | YYC³ Team |
 | v1.1.0 | 2026-11-04 | 修复复测：P0 语法修复 + 新发现 L7（.cjs 重命名）+ 路径遏制 + 依赖声明 + 标头标尾；功能验证 12/12 | YYC³ Team |
+| v1.2.0 | 2026-11-04 | YYC3-CLI 侧集成验证（file: 单源 + 薄适配 + 命令组注册），端到端全绿；评级 A− → A | YYC³ Team |
 
 ---
 
