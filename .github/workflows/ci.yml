@@ -39,8 +39,8 @@ jobs:
       - name: Security audit (fail on moderate+)
         run: pnpm audit --audit-level=moderate
 
-      - name: Type check (all workspace packages)
-        run: pnpm -r typecheck
+      - name: Type check (root + workspace packages)
+        run: pnpm typecheck && pnpm --filter @yyc3/i18n-react typecheck
 
       - name: Lint (zero warnings)
         run: pnpm exec eslint src/ --max-warnings 0
@@ -54,8 +54,8 @@ jobs:
       - name: Test with coverage
         run: pnpm test:coverage
 
-      - name: Build all workspace packages
-        run: pnpm -r build
+      - name: Build (root first, then workspace packages)
+        run: pnpm build && pnpm --filter @yyc3/i18n-react build
 
       - name: Test @yyc3/i18n-react
         run: pnpm --filter @yyc3/i18n-react test
