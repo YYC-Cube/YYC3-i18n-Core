@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * file chinese-detector.test.ts
  * description @yyc3/i18n-core chinese-detector.ts 单元测试
@@ -95,3 +103,10 @@ describe("ChineseDetector", () => {
     expect(custom.canDetect("app.ts")).toBe(false);
   });
 });
+
+// ============================================================
+// End of chinese-detector.test.ts | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

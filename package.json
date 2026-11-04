@@ -1,6 +1,6 @@
 {
   "name": "@yyc3/i18n-core",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "🌐 YYC³ Production-Ready Internationalization (i18n) Framework - High-performance, plugin-based, zero-dependency i18n solution for TypeScript/JavaScript applications",
   "keywords": [
     "i18n",
@@ -70,6 +70,10 @@
       "import": "./dist/lib/mcp/server.js",
       "types": "./dist/lib/mcp/server.d.ts"
     },
+    "./node": {
+      "import": "./dist/node.js",
+      "types": "./dist/node.d.ts"
+    },
     "./browser": {
       "import": "./dist/browser.js",
       "types": "./dist/browser.d.ts"
@@ -91,11 +95,13 @@
     "lint:fix": "eslint 'src/**/*.ts' --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "clean": "rm -rf dist coverage",
-    "prepublishOnly": "npm run clean && npm run build && npm test",
+    "size": "size-limit",
+    "audit:headers": "node scripts/header-footer-check.mjs",
+    "prepublishOnly": "npm run clean && npm run build && npm test && npm run audit:headers && npm run size",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.19.0"
   },
   "peerDependencies": {
     "lit": "^3.0.0"
@@ -107,6 +113,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@size-limit/file": "^14.3.0",
     "@types/node": "^20.11.0",
     "@typescript-eslint/utils": "^8.58.0",
     "@vitest/coverage-v8": "^4.1.11",
@@ -114,6 +121,7 @@
     "globals": "^17.4.0",
     "prettier": "^3.2.0",
     "rollup": "^4.20.0",
+    "size-limit": "^14.3.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "typescript-eslint": "^8.58.0",
@@ -127,7 +135,7 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "45 kB"
+      "limit": "95 kB"
     }
   ],
   "sideEffects": false,

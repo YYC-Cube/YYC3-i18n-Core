@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * @yyc3/i18n-core 初始化配置
  * 演示中文国际化最佳实践
@@ -124,3 +132,10 @@ export async function setupI18n() {
 
   console.log('🌐 i18n initialized - 中文示例就绪');
 }
+
+// ============================================================
+// End of i18n.ts | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

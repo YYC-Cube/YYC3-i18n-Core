@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * file index.ts
  * description @yyc3/i18n-core 模块入口
@@ -15,7 +23,7 @@
  * brief @yyc3/i18n-core 模块入口
  */
 // Core Engine
-export { I18nEngine, i18n, t } from "./lib/engine.js";
+export { I18nEngine, i18n, t, SUPPORTED_LOCALES, isSupportedLocale } from "./lib/engine.js";
 export type { I18nEngineConfig } from "./lib/engine.js";
 
 // Cache System
@@ -97,9 +105,9 @@ export type {
 
 // ============================================================
 // MCP Transport Layer
+// Node-only（node:stream 运行时依赖）——已迁移至 ./node 子路径，
+// 避免 Node 类型泄漏进浏览器环境的主入口类型声明
 // ============================================================
-
-export { StdioTransport } from "./lib/mcp/stdio-transport.js";
 
 // ============================================================
 // CLI Tools (AST Analysis & Chinese Detection)
@@ -159,13 +167,12 @@ export { safeEqualSecret } from "./lib/security/secret-equal.js";
 export { formatRelativeTimestamp, formatTimeAgo } from "./lib/utils/format-time.js";
 export type { FormatRelativeTimestampOptions, FormatTimeAgoOptions } from "./lib/utils/format-time.js";
 
-// Path Guards (Traversal Prevention)
-export {
-  hasNodeErrorCode, isNodeError, isNotFoundPathError, isPathInside, isSymlinkOpenError, normalizeWindowsPathForComparison
-} from "./lib/utils/path-guards.js";
+// Path Guards / JSON File Operations —— Node 专属（node:fs/node:path 运行时依赖），
+// 已迁移至 ./node 子路径（见 src/node.ts），主入口保持浏览器类型友好
 
-// JSON File Operations
-export {
-  deleteJsonFile, jsonFileExists, loadJsonFile,
-  saveJsonFile
-} from "./lib/utils/json-file.js";
+// ============================================================
+// End of index.ts | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

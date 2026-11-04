@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * @fileoverview Basic usage example for @yyc3/i18n-core
  * @description This example demonstrates the main features of the i18n core package
@@ -92,3 +100,10 @@ async function main() {
 }
 
 main();
+
+// ============================================================
+// End of basic-usage.ts | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

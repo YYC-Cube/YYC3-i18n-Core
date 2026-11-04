@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * file cache.ts
  * description LRU 缓存系统
@@ -35,7 +43,7 @@ export interface CacheStats {
   evictions: number;
 }
 
-export class LRUCache<T> {
+export class LRUCache<T = unknown> {
   private cache = new Map<string, CacheEntry<T>>();
   private hits = 0;
   private misses = 0;
@@ -130,3 +138,10 @@ export class LRUCache<T> {
     return Array.from(this.cache.values()).map((entry) => entry.value);
   }
 }
+
+// ============================================================
+// End of cache.ts | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * @file Trans.tsx
  * @description <Trans> component — declarative ICU translation with JSX interpolation
@@ -41,9 +49,13 @@ export function Trans({ id, values, components, fallback }: TransProps) {
 
   const text = t(id, stringValues);
 
+  // Engine returns the key itself on a miss — treat that as missing so the
+  // fallback chain (fallback → id) actually applies.
+  const isMissing = !text || text === id;
+
   // If no components, just render the translated string
   if (!components) {
-    return <>{text || fallback || id}</>;
+    return <>{isMissing ? (fallback ?? id) : text}</>;
   }
 
   // Interpolate JSX components into the translated text
@@ -110,3 +122,10 @@ function cloneWithChildren(element: ReactNode, children: ReactNode): ReactNode {
   }
   return element;
 }
+
+// ============================================================
+// End of Trans.tsx | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

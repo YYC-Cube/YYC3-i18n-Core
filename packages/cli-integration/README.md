@@ -7,8 +7,11 @@
 ### 1. 复制 i18n 命令模块
 
 ```bash
-cp packages/cli-integration/i18n-commands.js /Users/yanyu/YYC-Cube/YYC3-CLI/lib/i18n.js
+# <YYC3-CLI-ROOT> 为 YYC3-CLI 仓库本地路径
+cp packages/cli-integration/i18n-commands.cjs <YYC3-CLI-ROOT>/lib/i18n.cjs
 ```
+
+> 注：本模块为 CommonJS（`.cjs`）。若宿主 CLI 仓库 `package.json` 声明 `"type": "module"`，请保持 `.cjs` 扩展名以确保 `require` 可用。
 
 ### 2. 在 bin/yyc3-cli.js 中注册 i18n 命令组
 
@@ -16,7 +19,7 @@ cp packages/cli-integration/i18n-commands.js /Users/yanyu/YYC-Cube/YYC3-CLI/lib/
 
 ```javascript
 // ===== i18n 命令组 =====
-const { initI18n, extractKeys, auditCoverage } = require('../lib/i18n');
+const { initI18n, extractKeys, auditCoverage } = require('../lib/i18n.cjs');
 
 const i18n = program.command('i18n').description('🌐 i18n 国际化管理工具');
 
@@ -68,9 +71,13 @@ i18n
 ### 3. 添加 glob 依赖
 
 ```bash
-cd /Users/yanyu/YYC-Cube/YYC3-CLI
+cd <YYC3-CLI-ROOT>
 pnpm add glob
 ```
+
+### 4. 路径安全说明
+
+三个命令均执行**工作目录遏制校验**：目标路径（相对或绝对）解析后必须落在当前工作目录内，`../` 越界与 cwd 外绝对路径会被拒绝（`ERR_PATH_ESCAPE`）；跨目录操作请先 `cd` 到目标目录。
 
 ### 4. 使用
 

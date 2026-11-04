@@ -2,6 +2,8 @@
 
 > React bindings for [@yyc3/i18n-core](https://github.com/YYC-Cube/YYC3-i18n-Core) — Zero-boilerplate i18n with AI translation + MCP protocol
 
+> **发布状态**：本包尚未发布到 npm registry。请在 monorepo 内以 workspace 方式引用（`"@yyc3/i18n-react": "workspace:*"`），或通过 git 仓库安装；`npm install @yyc3/i18n-react` 将在首发版本后可用。
+
 ## Install
 
 ```bash
@@ -16,7 +18,8 @@ npm install @yyc3/i18n-react @yyc3/i18n-core
 import { I18nProvider } from '@yyc3/i18n-react';
 import { I18nEngine } from '@yyc3/i18n-core';
 
-const engine = new I18nEngine({ defaultLocale: 'en' });
+// 显式 locale 拥有最高优先级（不会被浏览器语言/本地存储覆盖）
+const engine = new I18nEngine({ locale: 'en' });
 
 function App() {
   return (
@@ -26,6 +29,8 @@ function App() {
   );
 }
 ```
+
+> SSR 注意：`en` 为同步内置语言；其余语言（如 `zh-CN`）为懒加载，服务端渲染请使用 `createServerEngine(locale)`（见下文）await 就绪后再渲染，否则译文将回退到 `en`。
 
 ### 2. Use the hook
 

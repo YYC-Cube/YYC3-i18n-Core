@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 import { defineConfig } from 'tsup'
 
 export default defineConfig([
@@ -21,6 +29,7 @@ export default defineConfig([
       'lib/icu/parser': 'src/lib/icu/parser.ts',
       'lib/ai/provider': 'src/lib/ai/provider.ts',
       'lib/mcp/server': 'src/lib/mcp/server.ts',
+      'node': 'src/node.ts',
     },
     format: ['esm'],
     dts: true,
@@ -45,3 +54,10 @@ export default defineConfig([
     outDir: 'dist',
   },
 ])
+
+// ============================================================
+// End of tsup.config.ts | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

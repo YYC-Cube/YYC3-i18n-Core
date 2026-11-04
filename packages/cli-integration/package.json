@@ -1,0 +1,13 @@
+{
+  "name": "@yyc3/cli-integration",
+  "version": "1.1.0",
+  "private": true,
+  "description": "YYC³ CLI i18n 命令集成模块 — 复制到 YYC3-CLI/lib/i18n.cjs 使用（不独立发布）",
+  "main": "./i18n-commands.cjs",
+  "scripts": {
+    "check": "node --check i18n-commands.cjs"
+  },
+  "dependencies": {
+    "glob": "^11.0.0"
+  }
+}

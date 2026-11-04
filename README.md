@@ -17,7 +17,7 @@
   <br/>
   <a href="https://www.npmjs.com/package/@yyc3/i18n-core"><img src="https://img.shields.io/npm/v/@yyc3/i18n-core.svg?style=flat-square&color=blue" alt="npm version" /></a>
   <a href="https://github.com/YYC-Cube/YYC3-i18n-Core/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@yyc3/i18n-core.svg?style=flat-square&color=brightgreen" alt="MIT License" /></a>
-  <img src="https://img.shields.io/node/v/@yyc3/i18n-core.svg?style=flat-square&logo=nodedotjs&logoColor=white&color=339933" alt="Node.js >=18" />
+  <img src="https://img.shields.io/node/v/@yyc3/i18n-core.svg?style=flat-square&logo=nodedotjs&logoColor=white&color=339933" alt="Node.js >=20.19" />
   <img src="https://img.shields.io/badge/pnpm-11-F9AD00?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm 11" />
   <br/>
   <img src="https://img.shields.io/badge/TypeScript-5.3+-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
@@ -192,7 +192,7 @@ import { MCPServer, registerI18nTools, StdioTransport } from '@yyc3/i18n-core/mc
 
 const server = new MCPServer({
   name: 'i18n-tools',
-  version: '1.4.0',
+  version: '3.0.2',
   transport: new StdioTransport(),
 });
 registerI18nTools(server);
@@ -206,7 +206,7 @@ await server.start();
 
 ### 前置要求
 
-- **Node.js** >= 18.0.0（`package.json` engines 声明，LTS 版本推荐）
+- **Node.js** >= 20.19.0（`package.json` engines 声明；`exports` 的 `require` 条件指向 ESM 产物，需 Node ≥ 20.19 的 require(esm) 支持）
 - **TypeScript** >= 5.0 (推荐，但也支持 JavaScript)
 
 ### 安装命令
@@ -491,10 +491,10 @@ interface I18nEngineConfig {
 ```typescript
 import { LRUCache } from '@yyc3/i18n-core/cache';
 
-// 创建缓存实例
-const cache = new LRUCache<string, string>({
+// 创建缓存实例（单泛型；TTL 配置键为 defaultTTL）
+const cache = new LRUCache<string>({
   maxSize: 1000,           // 最大缓存条目
-  ttl: 3600000,           // 过期时间 (1小时)
+  defaultTTL: 3600000,     // 过期时间 (1小时)
 });
 
 // 存取数据
@@ -682,7 +682,7 @@ import {
 // 创建 MCP Server
 const server = new MCPServer({
   name: 'yyc3-i18n-tools',
-  version: '1.4.0',
+  version: '3.0.2',
   transport: new StdioTransport(),
 });
 
@@ -792,12 +792,16 @@ import { MCPServer, registerI18nTools } from '@yyc3/i18n-core/mcp'
 
 | 子路径 | 大小估计(gzipped) | 导出内容 | 适用场景 |
 | -------- | ------------------- | ---------- | ---------- |
-| `.` | ~15KB | 全部功能 | 小型项目 / 快速原型 |
+| `.` | ~15KB | 全部功能（浏览器类型友好） | 小型项目 / 快速原型 |
 | `./cache` | ~3KB | LRU Cache 系统 | 需要高性能缓存 |
 | `./plugins` | ~4KB | 插件管理器 + 内置插件 | 需要扩展功能 |
 | `./icu` | ~5KB | ICU 解析器/编译器 | 复杂消息格式 |
 | `./ai` | ~4KB | AI 翻译 + 质量评估 | 需要 LLM 翻译 |
 | `./mcp` | ~3KB | MCP Server + Transport | AI Agent 集成 |
+| `./node` | ~5KB | StdioTransport + 路径防护 + JSON 文件操作 | Node 环境（node:fs/node:stream 专属工具） |
+| `./browser` | ~15KB | 浏览器安全入口（自包含单文件） | 浏览器直引 / CDN |
+
+> **迁移说明（3.1.0 起）**：`StdioTransport`、路径防护（`isNodeError` 等）与 JSON 文件操作工具已从主入口 `.` 迁移至 `./node` 子路径——主入口与 `./browser` 的类型声明不再引用 Node 专属类型，Web 项目类型检查开箱即通过。原从主入口导入这些工具的代码，请改 `import { ... } from '@yyc3/i18n-core/node'`。
 
 ### 打包体积对比
 
@@ -1400,7 +1404,7 @@ pnpm format
 
 ## 📄 License
 
-MIT © [YYC³ AI Team](https://github.com/YYC-Cube/YYC3-i18n-Core)
+MIT © [YYC³ Team](https://github.com/YYC-Cube/YYC3-i18n-Core)
 
 ---
 
@@ -1410,4 +1414,15 @@ MIT © [YYC³ AI Team](https://github.com/YYC-Cube/YYC3-i18n-Core)
 
 ---
 
-*文档版本: 2.4.2 | 最后更新: 2026-09-26*
+<p align="center">
+  <b>YYC³</b>（YanYuCloudCube™ · 注册商标）<br>
+  言启象限 | 语枢未来<br>
+  <i>Words Initiate Quadrants, Language Serves as Core for Future</i><br>
+  万象归元于云枢 | 深栈智启新纪元<br>
+  <i>All things converge in cloud pivot; Deep stacks ignite a new era of intelligence</i><br>
+  <sub>© 2026 YanYuCloudCube™（YYC³）· <a href="mailto:admin@0379.email">admin@0379.email</a></sub>
+</p>
+
+---
+
+*文档版本: 3.0.2 | 最后更新: 2026-11-04*

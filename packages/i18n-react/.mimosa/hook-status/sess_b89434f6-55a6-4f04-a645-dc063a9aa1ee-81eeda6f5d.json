@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "mimosa-hook-status/v1",
+  "recordedAt": "2026-11-04T04:26:27.401Z",
+  "sessionId": "sess_b89434f6-55a6-4f04-a645-dc063a9aa1ee",
+  "event": "PostToolUse",
+  "toolName": "Edit",
+  "file": "/Users/yanyu/YYC-Cube/personal/YYC3-i18n-Core/scripts/header-footer-check.mjs",
+  "outcome": "clear",
+  "coverage": "complete",
+  "findingCount": 0,
+  "durationMs": 4,
+  "hostState": "hook_complete",
+  "reportHint": ".mimosa/reports/"
+}

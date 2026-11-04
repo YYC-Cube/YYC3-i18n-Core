@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * @file I18nProvider.tsx
  * @description React Context Provider for @yyc3/i18n-core
@@ -29,6 +37,13 @@ export interface I18nProviderProps {
 }
 
 export function I18nProvider({ engine, children }: I18nProviderProps) {
+  if (!engine || typeof (engine as I18nEngine).getLocale !== 'function') {
+    throw new Error(
+      '<I18nProvider> requires an `engine` prop: ' +
+      'new I18nProvider({ engine }) — create one via `new I18nEngine({ locale })` ' +
+      'from @yyc3/i18n-core.',
+    );
+  }
   const [locale, setLocaleState] = useState<Locale>(engine.getLocale());
   const [ready, setReady] = useState(false);
 
@@ -77,3 +92,10 @@ export function useI18nContext(): I18nContextValue {
   }
   return ctx;
 }
+
+// ============================================================
+// End of I18nProvider.tsx | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================

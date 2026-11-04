@@ -1,3 +1,11 @@
+// ============================================================
+// YYC³（YanYuCloudCube™ · 注册商标）
+// 言启象限 | 语枢未来 · Words Initiate Quadrants, Language Serves as Core for Future
+// 万象归元于云枢 | 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// ============================================================
+// Copyright (c) 2026 YanYuCloudCube™（YYC³）| admin@0379.email
+// ============================================================
 /**
  * file engine.ts
  * description i18n 核心引擎实现
@@ -60,9 +68,12 @@ export class I18nEngine {
   private debugMode = false;
   private errorHandler?: I18nEngineConfig["onError"];
   private missingKeyHandler?: I18nEngineConfig["missingKeyHandler"];
+  /** Explicitly configured locale — wins over stored/detected preference. */
+  private explicitLocale?: Locale;
 
   constructor(config: I18nEngineConfig = {}) {
     // Initialize state
+    this.explicitLocale = config.locale;
     this.state = {
       locale: config.locale ?? DEFAULT_LOCALE,
       translations: { [DEFAULT_LOCALE]: en },
@@ -128,7 +139,8 @@ export class I18nEngine {
   }
 
   private loadInitialLocale(): void {
-    const initialLocale = this.resolveInitialLocale();
+    // An explicitly configured locale always wins over stored/detected preference.
+    const initialLocale = this.explicitLocale ?? this.resolveInitialLocale();
     if (initialLocale === DEFAULT_LOCALE) {
       this.state.locale = DEFAULT_LOCALE;
       return;
@@ -433,3 +445,10 @@ export const t = (key: string, params?: Record<string, string>) =>
   i18n.t(key, params);
 
 export { SUPPORTED_LOCALES, isSupportedLocale };
+
+// ============================================================
+// End of engine.ts | YYC³（YanYuCloudCube™ · 注册商标）
+// 万象归元于云枢 · 深栈智启新纪元
+// All things converge in cloud pivot; Deep stacks ignite a new era of intelligence
+// (c) 2026 YanYuCloudCube™（YYC³）· admin@0379.email
+// ============================================================
