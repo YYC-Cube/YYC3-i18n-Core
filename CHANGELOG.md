@@ -41,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔒 安全
+
+- **docs 与 examples 工作区漏洞清零（2026-11-04 扫描修复,各 6 项:2 high 3 moderate 1 low）**:vite ≤6.4.3 五项(launch-editor `fs.existsSync` 高危 / escapeCmdArgs % 转义缺失 / Editor CLI flag 误读 / `server.fs.allow` 越界 / 跨域脚本执行,修复仅存在于 6.4.4+)与 source-map-js <1.2.2(事件循环 DoS);经两独立工作区 overrides `vite: ^6.4.4` + `source-map-js: ">=1.2.2"` 重生成锁文件,实测三工作区(根/docs/examples)`pnpm audit` 全部 No known vulnerabilities;vitepress 构建(5.37s)与示例 vite 构建回归通过
+- **安全扫描四维复核(终极审核后置扫描)**:Mimosa deep 静态扫描 0 findings(封印 `sha256:eb91…`,如实标注 runStatus=inconclusive——调用图动态派发致覆盖 partial,属工具边界);gitleaks 全历史 53 提交 no leaks;根/docs/examples 三工作区依赖审计清零
+
+
+
 ### 🔧 修复
 
 - **RTL 镜像缺陷（终极审核新发现 W1）**：`createMirroredLayout` 的 `mirrorKeys` 同时包含 Left/Right 两侧，循环内从**自身镜像结果**读取值，导致后一个 mirrorKey 把前一个刚写入的对侧值再次镜像回原侧——`marginLeft` 永远无法镜像为 `marginRight`，RTL 布局镜像功能整体失效（双侧并存时右值丢失）。现改为从原始 `ltrConfig` 读取：单侧配置正确镜像（Left→Right 且移除原键），双侧并存为互换语义（两侧均保留）；`tests/rtl-utils` 29 项存量断言全数通过
