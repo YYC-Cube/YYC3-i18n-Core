@@ -66,6 +66,8 @@ export class I18nEngine {
   public readonly cache: LRUCache<string>;
   public readonly plugins: PluginManager;
   private debugMode = false;
+  /** setLocale 世代计数（C8 竞态守卫）：过期完成一律丢弃 */
+  private localeGeneration = 0;
   private errorHandler?: I18nEngineConfig["onError"];
   private missingKeyHandler?: I18nEngineConfig["missingKeyHandler"];
   /** Explicitly configured locale — wins over stored/detected preference. */
@@ -154,6 +156,10 @@ export class I18nEngine {
   }
 
   public async setLocale(locale: Locale): Promise<void> {
+    // 世代守卫（C8）：构造期 loadInitialLocale 的 void 异步加载与用户并发
+    // setLocale 竞速时，完成序 ≠ 调用序会令旧调用后写覆盖新调用——
+    // 每次调用捕获代数，过期完成一律丢弃
+    const generation = ++this.localeGeneration;
     const needsTranslationLoad =
       locale !== DEFAULT_LOCALE && !this.state.translations[locale];
 
@@ -166,6 +172,7 @@ export class I18nEngine {
     if (needsTranslationLoad) {
       try {
         const translation = await loadLazyLocaleTranslation(locale as Exclude<Locale, "en">);
+        if (generation !== this.localeGeneration) return;
         if (!translation) {
           const error = new Error(`Failed to load translation for locale: ${locale}`);
           this.handleError(error, { key: "", locale });
@@ -173,12 +180,14 @@ export class I18nEngine {
         }
         this.state.translations[locale] = translation;
       } catch (e) {
+        if (generation !== this.localeGeneration) return;
         const error = e instanceof Error ? e : new Error(String(e));
         this.handleError(error, { key: "", locale });
         return;
       }
     }
 
+    if (generation !== this.localeGeneration) return;
     this.state.locale = locale;
     this.persistLocale(locale);
 
