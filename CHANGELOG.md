@@ -41,6 +41,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🚀 新增（501 演进方案 G1/G2 生产落地，目标版本 3.2.0）
+
+- **插件合同 v2（G1）**：`I18nPluginV2`（v1 纯超集零改动兼容）——钩子 `priority` 排序（小者先执行，同值保持注册序）、`meta.capability` 能力声明（与技能包共享词汇表）、`definePlugin()` 工厂辅助（对齐 vite/rollup 约定，capability 自动冻结）；`register(plugin, { priority })` 注册选项
+- **Glossary 术语表（G2）**：`load/lookup/search/translationsFor/size/checkTranslations`——译文违规检测（源词出现但有固定译法 → 违规，含上下文摘录）；作为 MCP `glossary_lookup` 同源实现
+- **MCP 工具面 7→13（G2）**：`extract_keys`（t() 键提取，与 cli-integration 单源同款正则）、`compare_locales`（双语言差异矩阵）、`quality_score`（QualityEstimator 协议化）、`auto_fix_icu`（错误定位 + 二次解析验证的修复建议）、`export_formats`（JSON/CSV(RFC4180)/flat YAML 零依赖序列化）、`glossary_lookup`（exact/prefix/locale 三模式）
+- **tool-registry 模式（G2）**：`src/lib/mcp/tools/` 每工具一文件（13 文件），`registerI18nTools(server, engine, { glossary? })` 公共签名不变；`MCPServer.getToolHandler()` registry 消费端入口
+- **MCP Resources 面（G2）**：`locales://{locale}` 语言包只读资源 + `coverage://report` 覆盖率快照；`MCPResourceProvider`（canRead/read 合同）动态读取器机制，抛错映射 -32602
+- **Streamable HTTP 传输（G2）**：`StreamableHttpTransport`——MCP 规范 2025-03-26 现行标准（单端点 POST + JSON 响应模式），零依赖 `node:http` 自实现；`Mcp-Session-Id` 会话管理（initialize 建立/重置、DELETE 终止、失效 404）、Origin 白名单防 DNS rebinding、协议版本协商（2024-11-05/2025-03-26 回显）；JSON-RPC 一致性测试 12 项全过
+- **exports 契约门禁（G1）**：`pnpm audit:contract`——零依赖断言（dependencies 空）/exports 产物一致性/三入口 ESM-only/files 白名单/engines ≥20.19 require(esm) 合同；入 CI 与 prepublishOnly
+
+### 🔧 修复（501 G1/G2 配套）
+
+- MCP `initialize` 协议版本协商：原硬编码回显 `2024-11-05`，现尊重客户端请求版本（支持版本白名单内回显）
+- 趋势文档 Phase3 现存工具名漂移勘误回写（以 `src/lib/mcp/i18n-tools.ts` 实况为准）
+
+### 📚 文档（501 配套）
+
+- `docs/api/mcp.md` 全量更新：传输矩阵/13 工具清单/Resources 面/Glossary/插件 v2
+- 新增 `docs/guide/mcp-deploy.md` 部署运维指南：形态选型、Stdio/HTTP 配置、Nginx 反代基线、容器化、会话生命周期运维、监控指标、故障排查、安全基线、CI 门禁清单
+
+### 🧪 测试（501 G1/G2，累计 +43 用例）
+
+- 插件 v2 优先级/兼容/工厂 7 项；Glossary 7 项；MCP 新工具 12 项；Resources 走真实消息链路 5 项；Streamable HTTP JSON-RPC 一致性 12 项（含安全分支）
+
 ### 🔒 安全
 
 - **docs 与 examples 工作区漏洞清零（2026-11-04 扫描修复,各 6 项:2 high 3 moderate 1 low）**:vite ≤6.4.3 五项(launch-editor `fs.existsSync` 高危 / escapeCmdArgs % 转义缺失 / Editor CLI flag 误读 / `server.fs.allow` 越界 / 跨域脚本执行,修复仅存在于 6.4.4+)与 source-map-js <1.2.2(事件循环 DoS);经两独立工作区 overrides `vite: ^6.4.4` + `source-map-js: ">=1.2.2"` 重生成锁文件,实测三工作区(根/docs/examples)`pnpm audit` 全部 No known vulnerabilities;vitepress 构建(5.37s)与示例 vite 构建回归通过

@@ -50,22 +50,76 @@ export type I18nPlugin = {
   onMissingKey?: (key: string, locale: Locale) => string | void;
 };
 
+/** 默认钩子优先级——v1 插件未声明时的行为基线（小者先执行，同值保持注册序）。 */
+export const DEFAULT_PLUGIN_PRIORITY = 100;
+
+/**
+ * 插件合同 v2：v1 的纯超集（v1 裸对象零改动可注册）。
+ * - priority：钩子执行优先级（小者先执行，同值保持注册序）
+ * - meta.capability：能力声明词汇表——供 MCP 工具与技能包（SKILL.md）发现索引
+ */
+export type I18nPluginV2 = I18nPlugin & {
+  priority?: number;
+  meta?: { capability: readonly string[] };
+};
+
+/** 插件注册选项（v2）。 */
+export interface RegisterPluginOptions {
+  /** 钩子执行优先级，默认 DEFAULT_PLUGIN_PRIORITY；小者先执行，同值保持注册序 */
+  priority?: number;
+}
+
+/**
+ * 工厂形态辅助（对齐 vite/rollup 生态约定）：推导 I18nPluginV2 类型并校验
+ * capability 为只读字面量元组。裸对象注册依旧兼容，文档与脚手架一律示范本形态。
+ */
+export function definePlugin<const T extends I18nPluginV2>(plugin: T): T {
+  if (plugin.meta?.capability && !Object.isFrozen(plugin.meta.capability)) {
+    (plugin.meta as { capability: readonly string[] }).capability = Object.freeze([...plugin.meta.capability]);
+  }
+  return plugin;
+}
+
 export class PluginManager {
   private plugins = new Map<string, I18nPlugin>();
   private hookOrder: string[] = [];
+  private priorities = new Map<string, number>();
 
-  register(plugin: I18nPlugin): void {
+  register(plugin: I18nPlugin, options?: RegisterPluginOptions): void {
     if (this.plugins.has(plugin.name)) {
       logger.warn(`Plugin "${plugin.name}" is already registered. Overwriting.`);
     }
 
     this.plugins.set(plugin.name, plugin);
 
+    const priority = options?.priority ?? (plugin as I18nPluginV2).priority ?? DEFAULT_PLUGIN_PRIORITY;
+    this.priorities.set(plugin.name, priority);
+
+    // 稳定排序插入：同优先级保持注册序（新插件追加在同优先级尾部）
     if (!this.hookOrder.includes(plugin.name)) {
-      this.hookOrder.push(plugin.name);
+      const insertAt = this.hookOrder.findIndex((n) => (this.priorities.get(n) ?? DEFAULT_PLUGIN_PRIORITY) > priority);
+      if (insertAt === -1) {
+        this.hookOrder.push(plugin.name);
+      } else {
+        this.hookOrder.splice(insertAt, 0, plugin.name);
+      }
+    } else {
+      // 覆盖注册：按新优先级重排执行序
+      this.hookOrder = this.hookOrder.filter((n) => n !== plugin.name);
+      const insertAt = this.hookOrder.findIndex((n) => (this.priorities.get(n) ?? DEFAULT_PLUGIN_PRIORITY) > priority);
+      if (insertAt === -1) {
+        this.hookOrder.push(plugin.name);
+      } else {
+        this.hookOrder.splice(insertAt, 0, plugin.name);
+      }
     }
 
-    logger.info(`✅ Plugin "${plugin.name}" registered${plugin.version ? ` v${plugin.version}` : ''}`);
+    logger.info(`✅ Plugin "${plugin.name}" registered${plugin.version ? ` v${plugin.version}` : ''}${priority !== DEFAULT_PLUGIN_PRIORITY ? ` (priority ${priority})` : ''}`);
+  }
+
+  /** 钩子执行优先级（v2）。 */
+  getPriority(name: string): number | undefined {
+    return this.priorities.get(name);
   }
 
   unregister(name: string): boolean {
@@ -108,6 +162,7 @@ export class PluginManager {
       }
     }
     this.plugins.clear();
+    this.priorities.clear();
     this.hookOrder = [];
   }
 

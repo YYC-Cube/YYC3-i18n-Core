@@ -51,6 +51,9 @@ jobs:
       - name: Header/footer uniformity gate
         run: pnpm audit:headers
 
+      - name: Exports contract gate (zero-deps + artifacts)
+        run: pnpm audit:contract
+
       - name: Test with coverage
         run: pnpm test:coverage
 

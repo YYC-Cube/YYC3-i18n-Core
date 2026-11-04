@@ -23,6 +23,7 @@
  * brief MCP 服务端实现
  */
 import { logger } from "../infra/logger.js";
+import type { MCPResourceProvider } from "./resource-provider.js";
 import type {
   MCPMessage,
   MCPResource,
@@ -46,6 +47,7 @@ export class MCPServer {
   private transport: MCPTransport;
   private toolRegistrations = new Map<string, MCPToolRegistration>();
   private resources: MCPResource[] = [];
+  private resourceProviders: MCPResourceProvider[] = [];
 
   constructor(config: MCPServerConfig) {
     this.config = config;
@@ -61,8 +63,22 @@ export class MCPServer {
     this.resources.push(resource);
   }
 
+  /**
+   * 注册动态资源读取器（v3.2.0）：uri 匹配 canRead 即由 provider 提供内容，
+   * 未命中 provider 的 uri 回落静态 resources 表。i18n-tools 以此暴露
+   * locales://{locale} 与 coverage://report。
+   */
+  registerResourceProvider(provider: MCPResourceProvider): void {
+    this.resourceProviders.push(provider);
+  }
+
   getTools(): MCPTool[] {
     return Array.from(this.toolRegistrations.values()).map((r) => r.tool);
+  }
+
+  /** 读取已注册工具的处理器（tool-registry 消费端/测试入口）。 */
+  getToolHandler(name: string): ToolHandler | undefined {
+    return this.toolRegistrations.get(name)?.handler;
   }
 
   getResources(): MCPResource[] {
@@ -110,10 +126,15 @@ export class MCPServer {
   }
 
   private async handleInitialize(message: MCPMessage): Promise<void> {
+    const requested = (message.params as { protocolVersion?: string } | undefined)?.protocolVersion;
+    // 版本协商：客户端请求的版本受支持则回显，否则回落服务端支持版本（规范语义）
+    const SUPPORTED_PROTOCOL_VERSIONS = ["2024-11-05", "2025-03-26"];
+    const protocolVersion = requested && SUPPORTED_PROTOCOL_VERSIONS.includes(requested) ? requested : "2024-11-05";
+
     const serverInfo: MCPServerInfo = {
       name: this.config.name,
       version: this.config.version,
-      protocolVersion: "2024-11-05",
+      protocolVersion,
     };
 
     const capabilities: MCPServerCapabilities = {
@@ -122,7 +143,7 @@ export class MCPServer {
     };
 
     await this.sendResponse(message.id, {
-      protocolVersion: "2024-11-05",
+      protocolVersion,
       capabilities,
       serverInfo,
     });
@@ -154,6 +175,21 @@ export class MCPServer {
   private async handleResourceRead(message: MCPMessage): Promise<void> {
     const params = message.params ?? {};
     const uri = params.uri as string;
+
+    // v3.2.0：动态 provider 优先（模板 URI 如 locales://{locale}）
+    for (const provider of this.resourceProviders) {
+      if (!provider.canRead(uri)) continue;
+      try {
+        const content = await provider.read(uri);
+        await this.sendResponse(message.id, {
+          contents: [{ uri, mimeType: content.mimeType ?? "application/json", text: content.text }],
+        });
+      } catch (error) {
+        await this.sendError(message.id, -32602, `Resource read failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      return;
+    }
+
     const resource = this.resources.find((r) => r.uri === uri);
 
     if (!resource) {

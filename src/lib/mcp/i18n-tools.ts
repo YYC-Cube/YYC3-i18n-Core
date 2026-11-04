@@ -8,265 +8,112 @@
 // ============================================================
 /**
  * file i18n-tools.ts
- * description MCP i18n 工具集
+ * description MCP i18n 工具集聚合入口 — tool-registry 模式（每工具一文件，见 ./tools/）
  * module @yyc3/i18n-core
  * author YanYuCloudCube Team <admin@0379.email>
- * version 2.3.0
+ * version 3.2.0
  * created 2026-04-24
- * updated 2026-04-24
+ * updated 2026-11-04
  * status active
  * tags [module],[mcp]
  *
  * copyright YanYuCloudCube Team
  * license MIT
  *
- * brief MCP i18n 工具集
+ * brief registerI18nTools(server, engine, options?) 公共签名不变；
+ *       3.2.0 起工具面 7→13（501 方案 G2），术语表经 options 注入
  */
 import type { I18nEngine } from "../engine.js";
+import type { Glossary } from "../glossary.js";
 import type { MCPServer } from "./server.js";
-import type { MCPTool, MCPToolResult } from "./types.js";
+import { createAddTranslationKeyTool } from "./tools/add-translation-key.js";
+import { createAutoFixIcuTool } from "./tools/auto-fix-icu.js";
+import { createCheckMissingKeysTool } from "./tools/check-missing-keys.js";
+import { createCompareLocalesTool } from "./tools/compare-locales.js";
+import { createExportFormatsTool } from "./tools/export-formats.js";
+import { createExtractKeysTool } from "./tools/extract-keys.js";
+import { createGlossaryLookupTool } from "./tools/glossary-lookup.js";
+import { createLocaleStatsTool } from "./tools/locale-stats.js";
+import { createQualityReportTool } from "./tools/quality-report.js";
+import { createQualityScoreTool } from "./tools/quality-score.js";
+import { createSearchTranslationsTool } from "./tools/search-translations.js";
+import { createSetLocaleTool } from "./tools/set-locale.js";
+import type { ToolDeps, ToolDefinition } from "./tools/shared.js";
+import { createTranslateKeyTool } from "./tools/translate-key.js";
 
-function flattenTranslations(obj: Record<string, unknown>, prefix = ""): Record<string, string> {
-  const result: Record<string, string> = {};
-  for (const [key, value] of Object.entries(obj)) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
-    if (value && typeof value === "object") {
-      Object.assign(result, flattenTranslations(value as Record<string, unknown>, fullKey));
-    } else {
-      result[fullKey] = String(value);
-    }
-  }
-  return result;
+export interface RegisterI18nToolsOptions {
+  /** 术语表注入后启用 glossary_lookup 工具的完整查询能力 */
+  glossary?: Glossary;
 }
 
-export function registerI18nTools(server: MCPServer, engine: I18nEngine): void {
-  const tools: Array<{ tool: MCPTool; handler: (args: Record<string, unknown>) => Promise<MCPToolResult> }> = [
-    {
-      tool: {
-        name: "search_translations",
-        description: "Fuzzy search translation keys across all locales",
-        inputSchema: {
-          type: "object",
-          properties: {
-            query: { type: "string", description: "Search query (key or value)" },
-            locale: { type: "string", description: "Optional locale filter" },
-          },
-          required: ["query"],
-        },
-      },
-      handler: async (args) => {
-        const query = String(args.query).toLowerCase();
-        const stats = engine.getStats();
-        const matches: Array<{ key: string; value: string; locale: string }> = [];
-
-        for (const loadedLocale of stats.loadedLocales) {
-          if (args.locale && loadedLocale !== String(args.locale)) continue;
-          const translations = engine.getTranslations(loadedLocale as never);
-          if (!translations) continue;
-          const flat = flattenTranslations(translations as Record<string, unknown>);
-          for (const [key, value] of Object.entries(flat)) {
-            if (key.toLowerCase().includes(query) || value.toLowerCase().includes(query)) {
-              matches.push({ key, value, locale: loadedLocale });
-            }
-          }
-        }
-
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({ query, matches, count: matches.length }, null, 2),
-          }],
-        };
-      },
-    },
-    {
-      tool: {
-        name: "add_translation_key",
-        description: "Add a new translation key with value",
-        inputSchema: {
-          type: "object",
-          properties: {
-            key: { type: "string", description: "Translation key" },
-            value: { type: "string", description: "Translation value" },
-            locale: { type: "string", description: "Target locale" },
-          },
-          required: ["key", "value", "locale"],
-        },
-      },
-      handler: async (args) => {
-        const key = String(args.key);
-        const value = String(args.value);
-        const locale = String(args.locale);
-
-        engine.registerTranslation(locale as never, { [key]: value });
-
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({ success: true, key, value, locale }),
-          }],
-        };
-      },
-    },
-    {
-      tool: {
-        name: "translate_key",
-        description: "Get translation for a specific key",
-        inputSchema: {
-          type: "object",
-          properties: {
-            key: { type: "string", description: "Translation key" },
-            locale: { type: "string", description: "Target locale" },
-            params: { type: "object", description: "Interpolation parameters" },
-          },
-          required: ["key"],
-        },
-      },
-      handler: async (args) => {
-        const key = String(args.key);
-        const params = args.params as Record<string, string> | undefined;
-        const result = engine.t(key, params);
-
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({ key, value: result, locale: engine.getLocale() }),
-          }],
-        };
-      },
-    },
-    {
-      tool: {
-        name: "check_missing_keys",
-        description: "Check for missing translation keys across locales",
-        inputSchema: {
-          type: "object",
-          properties: {
-            locale: { type: "string", description: "Locale to check" },
-          },
-          required: ["locale"],
-        },
-      },
-      handler: async (args) => {
-        const targetLocale = String(args.locale);
-        const stats = engine.getStats();
-        const missingKeys: Array<{ key: string; inLocale: string; missingIn: string }> = [];
-
-        const sourceTranslations = engine.getTranslations(stats.locale as never);
-        const targetTranslations = engine.getTranslations(targetLocale as never);
-
-        if (sourceTranslations && targetTranslations) {
-          const flatSource = flattenTranslations(sourceTranslations);
-          const flatTarget = flattenTranslations(targetTranslations);
-          for (const key of Object.keys(flatSource)) {
-            if (!(key in flatTarget)) {
-              missingKeys.push({ key, inLocale: stats.locale, missingIn: targetLocale });
-            }
-          }
-        }
-
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({
-              sourceLocale: stats.locale,
-              targetLocale,
-              loadedLocales: stats.loadedLocales,
-              missingKeys,
-              missingCount: missingKeys.length,
-            }),
-          }],
-        };
-      },
-    },
-    {
-      tool: {
-        name: "get_locale_stats",
-        description: "Get translation statistics for all locales",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-      handler: async () => {
-        const stats = engine.getStats();
-
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify(stats, null, 2),
-          }],
-        };
-      },
-    },
-    {
-      tool: {
-        name: "set_locale",
-        description: "Change the active locale",
-        inputSchema: {
-          type: "object",
-          properties: {
-            locale: { type: "string", description: "New locale to set" },
-          },
-          required: ["locale"],
-        },
-      },
-      handler: async (args) => {
-        const locale = String(args.locale);
-        const oldLocale = engine.getLocale();
-        await engine.setLocale(locale as never);
-
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({ previousLocale: oldLocale, currentLocale: engine.getLocale() }),
-          }],
-        };
-      },
-    },
-    {
-      tool: {
-        name: "quality_report",
-        description: "Generate translation quality report",
-        inputSchema: {
-          type: "object",
-          properties: {
-            keys: {
-              type: "string",
-              description: "JSON array of keys to check",
-            },
-          },
-        },
-      },
-      handler: async (args) => {
-        const keys = (args.keys as string[]) ?? [];
-        const results = keys.map((key) => ({
-          key,
-          value: engine.t(key),
-          locale: engine.getLocale(),
-          hasFallback: engine.t(key) === key,
-        }));
-
-        const missingCount = results.filter((r) => r.hasFallback).length;
-
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({
-              total: results.length,
-              missing: missingCount,
-              coverage: results.length > 0 ? ((1 - missingCount / results.length) * 100).toFixed(1) + "%" : "N/A",
-              results,
-            }, null, 2),
-          }],
-        };
-      },
-    },
+export function registerI18nTools(server: MCPServer, engine: I18nEngine, options: RegisterI18nToolsOptions = {}): void {
+  const deps: ToolDeps = { engine, glossary: options.glossary };
+  const tools: ToolDefinition[] = [
+    // 存量 7 工具（行为保持，tests/mcp 保护）
+    createSearchTranslationsTool(deps),
+    createAddTranslationKeyTool(deps),
+    createTranslateKeyTool(deps),
+    createCheckMissingKeysTool(deps),
+    createLocaleStatsTool(deps),
+    createSetLocaleTool(deps),
+    createQualityReportTool(deps),
+    // 3.2.0 新增（501 方案 G2）
+    createExtractKeysTool(),
+    createCompareLocalesTool(deps),
+    createQualityScoreTool(deps),
+    createAutoFixIcuTool(),
+    createExportFormatsTool(deps),
+    createGlossaryLookupTool(deps),
   ];
 
   for (const { tool, handler } of tools) {
     server.registerTool(tool, handler);
   }
+
+  registerI18nResources(server, engine);
+}
+
+/**
+ * Resources 面（501 G2.4）：locales://{locale} 语言包只读资源 +
+ * coverage://report 覆盖率快照。模板 URI 经 provider 动态读取。
+ */
+function registerI18nResources(server: MCPServer, engine: I18nEngine): void {
+  server.registerResource({ uri: "locales://{locale}", name: "Locale translations", description: "Read-only translations of a loaded locale", mimeType: "application/json" });
+  server.registerResource({ uri: "coverage://report", name: "Coverage report", description: "Missing-key snapshot of all loaded locales", mimeType: "application/json" });
+
+  server.registerResourceProvider({
+    canRead: (uri) => uri.startsWith("locales://") || uri === "coverage://report",
+    read: async (uri) => {
+      if (uri === "coverage://report") {
+        const stats = engine.getStats();
+        const sourceFlat = flattenAll(engine.getTranslations(stats.locale as never));
+        const perLocale = stats.loadedLocales
+          .filter((l) => l !== stats.locale)
+          .map((l) => {
+            const flat = flattenAll(engine.getTranslations(l as never));
+            const missing = Object.keys(sourceFlat).filter((k) => !(k in flat));
+            return { locale: l, sourceKeys: Object.keys(sourceFlat).length, missingCount: missing.length, missing };
+          });
+        return { text: JSON.stringify({ sourceLocale: stats.locale, loadedLocales: stats.loadedLocales, perLocale }, null, 2) };
+      }
+
+      const locale = decodeURIComponent(uri.slice("locales://".length));
+      const translations = engine.getTranslations(locale as never);
+      if (!translations) throw new Error(`Locale not loaded: ${locale}`);
+      return { text: JSON.stringify({ locale, translations }, null, 2) };
+    },
+  });
+}
+
+function flattenAll(obj: Record<string, unknown> | undefined, prefix = ""): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!obj) return out;
+  for (const [k, v] of Object.entries(obj)) {
+    const key = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === "object") Object.assign(out, flattenAll(v as Record<string, unknown>, key));
+    else out[key] = String(v);
+  }
+  return out;
 }
 
 // ============================================================

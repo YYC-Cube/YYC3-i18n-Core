@@ -97,7 +97,8 @@
     "clean": "rm -rf dist coverage",
     "size": "size-limit",
     "audit:headers": "node scripts/header-footer-check.mjs",
-    "prepublishOnly": "npm run clean && npm run build && npm test && npm run audit:headers && npm run size",
+    "audit:contract": "node scripts/exports-contract-check.mjs",
+    "prepublishOnly": "npm run clean && npm run build && npm test && npm run audit:headers && npm run audit:contract && npm run size",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "engines": {

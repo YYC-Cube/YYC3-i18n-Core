@@ -470,13 +470,17 @@ jobs:
 
 ### 节点 3.1: MCP Server增强
 
+> **2026-11-04 勘误**：本节"当前MCP工具"原记载的 5 个工具名（translate_batch 等）
+> 与实况不符——实况以 `src/lib/mcp/i18n-tools.ts` 为准，已在 501 演进方案
+> （docs/05-YYC3-智能演进-优化阶段/501）完成对账回写。
+
 ```
-当前MCP工具 (5个):
-├── translate_batch   — 批量翻译
-├── detect_language   — 语言检测
-├── validate_icu      — ICU格式验证
-├── audit_coverage    — 覆盖率审计
-└── suggest_keys      — AI键名建议
+当前MCP工具 (5个, 2026-11-04 实况核对):
+├── search_translations  — 模糊搜索全部语言的翻译键与值
+├── add_translation_key  — 新增翻译键（键/值/语言）
+├── translate_key        — 读取指定键翻译（含插值参数）
+├── check_missing_keys   — 跨语言缺失键检查
+└── get_locale_stats     — 全语言翻译统计
 
 新增MCP工具 (Phase 3):
 ├── extract_keys      — 从代码提取翻译键
