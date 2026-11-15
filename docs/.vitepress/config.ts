@@ -326,6 +326,9 @@ export default defineConfig({
           items: [
             { text: 'AI 翻译集成', link: '/guide/ai-translation' },
             { text: 'MCP 协议集成', link: '/guide/mcp-integration' },
+            { text: '技能矩阵', link: '/guide/skills-matrix' },
+            { text: 'OTA 热更新与审计', link: '/guide/ota-updates' },
+            { text: 'SSO 翻译工作流', link: '/guide/translation-workflow' },
             { text: '安全防护', link: '/guide/security' },
             { text: '性能优化', link: '/guide/performance' },
           ],
