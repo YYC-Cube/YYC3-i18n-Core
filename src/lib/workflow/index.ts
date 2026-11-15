@@ -37,6 +37,9 @@ export type {
 export { OidcIdentityError, OidcIdentityProvider, StaticIdentityProvider } from "./identity.js";
 export type { IdentityContext, IdentityProvider, OidcIdentityProviderConfig } from "./identity.js";
 
+// 持久化抽象（3.6.0 起，502 P1-a——Node 实现见 @yyc3/i18n-core/node 的 JsonFileWorkflowStore）
+export type { WorkflowSnapshot, WorkflowStore } from "./store.js";
+
 // ============================================================
 // End of index.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元

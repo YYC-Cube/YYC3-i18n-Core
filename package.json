@@ -1,6 +1,6 @@
 {
   "name": "@yyc3/i18n-core",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "🌐 YYC³ Production-Ready Internationalization (i18n) Framework - High-performance, plugin-based, zero-dependency i18n solution for TypeScript/JavaScript applications",
   "keywords": [
     "i18n",
@@ -46,45 +46,54 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./cache": {
+      "types": "./dist/lib/cache.d.ts",
       "import": "./dist/lib/cache.js",
-      "types": "./dist/lib/cache.d.ts"
+      "require": "./dist/lib/cache.js"
     },
     "./plugins": {
+      "types": "./dist/lib/plugins/index.d.ts",
       "import": "./dist/lib/plugins/index.js",
-      "types": "./dist/lib/plugins/index.d.ts"
+      "require": "./dist/lib/plugins/index.js"
     },
     "./icu": {
+      "types": "./dist/lib/icu/parser.d.ts",
       "import": "./dist/lib/icu/parser.js",
-      "types": "./dist/lib/icu/parser.d.ts"
+      "require": "./dist/lib/icu/parser.js"
     },
     "./ai": {
+      "types": "./dist/lib/ai/provider.d.ts",
       "import": "./dist/lib/ai/provider.js",
-      "types": "./dist/lib/ai/provider.d.ts"
+      "require": "./dist/lib/ai/provider.js"
     },
     "./mcp": {
+      "types": "./dist/lib/mcp/server.d.ts",
       "import": "./dist/lib/mcp/server.js",
-      "types": "./dist/lib/mcp/server.d.ts"
+      "require": "./dist/lib/mcp/server.js"
     },
     "./ota": {
+      "types": "./dist/lib/ota/index.d.ts",
       "import": "./dist/lib/ota/index.js",
-      "types": "./dist/lib/ota/index.d.ts"
+      "require": "./dist/lib/ota/index.js"
     },
     "./workflow": {
+      "types": "./dist/lib/workflow/index.d.ts",
       "import": "./dist/lib/workflow/index.js",
-      "types": "./dist/lib/workflow/index.d.ts"
+      "require": "./dist/lib/workflow/index.js"
     },
     "./node": {
+      "types": "./dist/node.d.ts",
       "import": "./dist/node.js",
-      "types": "./dist/node.d.ts"
+      "require": "./dist/node.js"
     },
     "./browser": {
+      "types": "./dist/browser.d.ts",
       "import": "./dist/browser.js",
-      "types": "./dist/browser.d.ts"
+      "require": "./dist/browser.js"
     },
     "./package.json": "./package.json"
   },
@@ -107,8 +116,8 @@
     "size": "size-limit",
     "audit:headers": "node scripts/header-footer-check.mjs",
     "audit:contract": "node scripts/exports-contract-check.mjs",
-    "prepublishOnly": "npm run clean && npm run build && npm test && npm run audit:headers && npm run audit:contract && npm run size",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "smoke:registry": "node scripts/registry-smoke.mjs",
+    "prepublishOnly": "npm run clean && npm run build && npm test && npm run audit:headers && npm run audit:contract && npm run size"
   },
   "engines": {
     "node": ">=20.19.0"

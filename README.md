@@ -806,6 +806,7 @@ await workflow.publish({ entryId: 1, actor: adminCtx });                     // 
 - **权限矩阵**：translator 提交/修订 · reviewer 批/驳 · admin 发布（`ACTION_ROLES` 单一事实源）
 - **OIDC 验证**（`OidcIdentityProvider`）：JWKS 缓存 + RS256/ES256 `crypto.subtle` 验签 + `iss/aud/exp` 校验——零依赖；生产接 Keycloak/Auth0 只需 `jwksUri/issuer/audience` 三参
 - **MCP 选择性面**：`registerWorkflowTools(server, workflow)` 增 `workflow_submit/approve/reject/publish/list` 五工具（token 每调用现验；不接线则缺省 13 工具面不变）
+- **持久化**（3.6.0 起）：`WorkflowStore` 抽象 + `JsonFileWorkflowStore`（`@yyc3/i18n-core/node`，原子写 tmp+rename）；`TranslationWorkflow.restore(options)` 启动装载、每次流转自动落盘、id 序号跨进程续增；存档损坏显式抛错不静默清零
 - 可视化：`@yyc3/i18n-dashboard` 0.2.0 的 `<WorkflowPanel entries={...}>` + `useWorkflowQueue(workflow)`
 
 ---

@@ -38,6 +38,9 @@ export {
   saveJsonFile
 } from "./lib/utils/json-file.js";
 
+// 工作流 JSON 文件存储（3.6.0 起，502 P1-a——node:fs 依赖，原子写：tmp + rename）
+export { JsonFileWorkflowStore } from "./lib/workflow/json-file-store.js";
+
 // ============================================================
 // End of node.ts | YYC³（YanYuCloudCube™ · 注册商标）
 // 万象归元于云枢 · 深栈智启新纪元

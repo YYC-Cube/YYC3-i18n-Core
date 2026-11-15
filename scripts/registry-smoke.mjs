@@ -126,6 +126,19 @@ try {
       server.getTools().filter((t) => t.name.startsWith("workflow_")).length === 5 && bare.getTools().length === 13, "");
   }
 
+  if (ge(3, 6)) {
+    const nodeMod = await import(`${PKG}/dist/node.js`);
+    check("S16 ./node JsonFileWorkflowStore", typeof nodeMod.JsonFileWorkflowStore === "function", "");
+    const storeFile = path.join(tmp, "wf.json");
+    const wf = new main.TranslationWorkflow({ store: new nodeMod.JsonFileWorkflowStore(storeFile) });
+    const entry = await wf.submit({ locale: "ja", key: "persist.k", value: "持久", actor: { userId: "t", roles: ["translator"] } });
+    // 跨实例恢复（模拟进程重启）：状态与 id 序号续存
+    const revived = await main.TranslationWorkflow.restore({ store: new nodeMod.JsonFileWorkflowStore(storeFile) });
+    const next = await revived.submit({ locale: "ja", key: "persist.k2", value: "v2", actor: { userId: "t", roles: ["translator"] } });
+    check("S17 持久化恢复+id 续增",
+      revived.get(entry.id)?.state === "submitted" && next.id === entry.id + 1, `nextId=${next.id}`);
+  }
+
   if (withDashboard && ge(3, 4)) {
     const DASH = path.join(tmp, "node_modules", "@yyc3", "i18n-dashboard");
     const dash = await import(`${DASH}/dist/index.js`);

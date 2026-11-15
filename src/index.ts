@@ -208,7 +208,8 @@ export type {
   ActorInput, EntryOpInput, IdentityContext, IdentityProvider,
   OidcIdentityProviderConfig, PublishInput, SubmitInput,
   TranslationWorkflowOptions, WorkflowAction, WorkflowEntry,
-  WorkflowRole, WorkflowState, WorkflowTransition
+  WorkflowRole, WorkflowSnapshot, WorkflowState, WorkflowStore,
+  WorkflowTransition
 } from "./lib/workflow/index.js";
 
 export { registerWorkflowTools } from "./lib/mcp/workflow-tools.js";

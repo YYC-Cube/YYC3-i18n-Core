@@ -81,6 +81,29 @@ registerWorkflowTools(server, workflow);
 // workflow_submit / workflow_approve / workflow_reject / workflow_publish / workflow_list
 ```
 
+## 持久化（3.6.0 起，502 P1-a）
+
+审批队列不再随进程重启丢失：`WorkflowStore` 抽象 + Node 内置 JSON 文件实现（原子写：临时文件 + rename）。
+
+```ts
+import { JsonFileWorkflowStore } from '@yyc3/i18n-core/node';
+import { TranslationWorkflow } from '@yyc3/i18n-core/workflow';
+
+const store = new JsonFileWorkflowStore('./data/workflow.json');
+
+// 启动装载：无存档即全新实例；词条 id 序号跨进程续增不撞号
+const workflow = await TranslationWorkflow.restore({ engine, identity, store });
+
+// 此后每次流转自动落盘（await 完成=持久化可见；失败即抛错）
+await workflow.submit({ locale: 'ja', key: 'nav.home', value: 'ホーム', actor });
+```
+
+语义与边界：
+
+- **损坏即显式抛错**：存档 JSON 损坏/形态非法时 `load` 抛错（含 `cause`），绝不静默清零
+- **自动持久化时机**：submit / resubmit / approve / reject / publish 返回前 `await` 落盘；持久化失败时内存态已变更，调用方须显式处理
+- **单进程假设**：多进程并发写同一存储需上层串行化；自定义存储实现 `WorkflowStore` 双方法即可（数据库/对象存储同理）
+
 ## 审批队列可视化
 
 `@yyc3/i18n-dashboard` 0.2.0 起内置工作流面板：

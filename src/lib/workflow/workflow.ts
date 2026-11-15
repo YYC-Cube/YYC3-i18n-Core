@@ -26,6 +26,7 @@
 import type { I18nEngine } from "../engine.js";
 import type { Locale, TranslationMap } from "../types.js";
 import type { IdentityContext, IdentityProvider } from "./identity.js";
+import type { WorkflowSnapshot, WorkflowStore } from "./store.js";
 import { ACTION_ROLES, isValidTransition, roleCanAction } from "./state-machine.js";
 import type { WorkflowAction, WorkflowRole, WorkflowState } from "./state-machine.js";
 
@@ -86,6 +87,12 @@ export interface TranslationWorkflowOptions {
   identity?: IdentityProvider;
   /** 流转回调（外接 AuditLogger/SIEM 的桥接点）。 */
   onTransition?: (transition: WorkflowTransition, entry: WorkflowEntry) => void;
+  /**
+   * 持久化存储（502 P1-a）：配置后每次流转自动全量落盘（await 完成才返回——
+   * 持久化失败即抛错，此时内存态已变更，调用方须显式处理）。
+   * 装载用 TranslationWorkflow.restore()；Node 实现见 @yyc3/i18n-core/node。
+   */
+  store?: WorkflowStore;
 }
 
 export interface SubmitInput {
@@ -120,6 +127,25 @@ export class TranslationWorkflow {
     this.options = options;
   }
 
+  /**
+   * 从存储装载（502 P1-a）：无存档（load 返回 null）即全新实例；
+   * 词条 id 序号发生器随快照恢复，跨进程不撞号。
+   */
+  static async restore(options: TranslationWorkflowOptions = {}): Promise<TranslationWorkflow> {
+    const workflow = new TranslationWorkflow(options);
+    if (!options.store) return workflow;
+    const snapshot = await options.store.load();
+    if (!snapshot) return workflow;
+    workflow.entries = snapshot.entries.map((e) => ({ ...e, trail: e.trail.map((t) => ({ ...t })) }));
+    workflow.nextId = snapshot.nextId;
+    return workflow;
+  }
+
+  /** 当前可持久化快照（词条为拷贝，外部改动不影响内部态）。 */
+  snapshot(): WorkflowSnapshot {
+    return { entries: this.entries.map((e) => this.clone(e)), nextId: this.nextId, savedAt: Date.now() };
+  }
+
   /** 验证令牌 → 身份（未配置 IdentityProvider 则抛错）。 */
   async authorize(token: string): Promise<IdentityContext> {
     if (!this.options.identity) throw new Error("未配置 IdentityProvider——token 形态 actor 不可用");
@@ -143,6 +169,7 @@ export class TranslationWorkflow {
     };
     this.appendTrail(entry, actor, "submit", null, "submitted");
     this.entries.push(entry);
+    await this.persist();
     return this.clone(entry);
   }
 
@@ -151,6 +178,7 @@ export class TranslationWorkflow {
     if (input.value !== undefined) entry.value = input.value;
     this.appendTrail(entry, await this.resolveActor(input.actor), "resubmit", "rejected", "submitted");
     entry.state = "submitted";
+    await this.persist();
     return this.clone(entry);
   }
 
@@ -158,6 +186,7 @@ export class TranslationWorkflow {
     const entry = await this.take(input.entryId, "approve", input.actor);
     this.appendTrail(entry, await this.resolveActor(input.actor), "approve", "submitted", "approved", input.note);
     entry.state = "approved";
+    await this.persist();
     return this.clone(entry);
   }
 
@@ -165,6 +194,7 @@ export class TranslationWorkflow {
     const entry = await this.take(input.entryId, "reject", input.actor);
     this.appendTrail(entry, await this.resolveActor(input.actor), "reject", "submitted", "rejected", input.note);
     entry.state = "rejected";
+    await this.persist();
     return this.clone(entry);
   }
 
@@ -185,6 +215,7 @@ export class TranslationWorkflow {
       entry.state = "published";
       this.options.engine?.registerTranslation(entry.locale, this.asNested(entry));
     }
+    await this.persist();
     return targets.map((e) => this.clone(e));
   }
 
@@ -242,6 +273,12 @@ export class TranslationWorkflow {
 
   private assertPermission(action: WorkflowAction, roles: WorkflowRole[]): void {
     if (!roleCanAction(roles, action)) throw new WorkflowPermissionError(action, roles);
+  }
+
+  /** 配置了 store 才落盘（未配置零开销）；await 完成即调用方可见持久化结果。 */
+  private async persist(): Promise<void> {
+    if (!this.options.store) return;
+    await this.options.store.save(this.snapshot());
   }
 
   private async resolveActor(actor: ActorInput): Promise<IdentityContext> {

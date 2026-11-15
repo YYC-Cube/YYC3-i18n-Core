@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.6.0] - 2026-11-16
+
+502 方案 **P1-a 工作流持久化**（SSO 工作流生产化收口）+ 导出面/流程双决策落地。
+
+### 🚀 新增
+
+- **`WorkflowStore` 持久化抽象**（`./workflow` 类型 + 主入口）：`save/load` 双方法契约，快照含词条全量 + id 序号发生器状态——自定义存储（数据库/对象存储）实现接口即可
+- **`JsonFileWorkflowStore`**（`@yyc3/i18n-core/node`，node:fs 专属面）：**原子写**（临时文件 + 同盘 rename，读侧永不见半写）；`load` 文件不存在返回 null（首启）；**损坏/形态非法显式抛错（含 cause）**，绝不静默清零
+- **`TranslationWorkflow.restore(options)`**：启动装载（无存档即全新实例）；配置 store 后**每次流转自动落盘**（await 完成即持久化可见，失败即抛——内存态已变更的语义已文档化）；词条 id 跨进程续增不撞号；`snapshot()` 公共快照（拷贝隔离）
+
+### 🔧 导出面与流程决策
+
+- **全子路径补齐 `require` 条件**（指向 ESM 产物，require(esm)——engines ≥20.19 基线内合法）+ `types` 条件前置：CJS 消费者经 `require('@yyc3/i18n-core/...')` 全子路径可达（主入口/mcp/workflow 三面 CJS 运行时实证 + 契约门禁 0 违规）
+- **CHANGELOG 单轨**：移除 `version` 脚本（conventional-changelog 自动生成），保留手写叙事风格
+- 新增 `smoke:registry` 脚本别名（registry 真实安装冒烟资产化入口）
+
+### 🧪 复测总账
+
+843 测试全绿（新增 9：内存桩集成 + JSON 文件存储往返/原子性/损坏分支 + 跨实例持久化端到端）；覆盖率 96.75/**90.31**/97.1/97.62（分支门禁 90 保持）；lint 0 / 契约 0 / 标头尾全绿 / brotli 27.69 kB < 95 kB
+
+---
+
 ## [3.5.0] - 2026-11-05
 
 502 方案 **SSO 翻译工作流**（501 G4 遗留项独立立项收官）：译者角色 × 审批链 × 身份抽象——方案文档 `docs/05-.../502-YYC3-i18n-SSO翻译工作流方案.md`。
