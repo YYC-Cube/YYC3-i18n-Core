@@ -153,6 +153,45 @@ describe("独立面板（可单独消费）", () => {
     const html = renderToString(<MissingKeysPanel entries={[{ key: "k", locale: "ja", timestamp: 1, count: 3 }]} />);
     expect(asText(html)).toContain("ja · k ×3");
   });
+
+  it("CoveragePanel 空态：仅源语言装载", () => {
+    const html = renderToString(<CoveragePanel coverage={[]} />);
+    expect(html).toContain('data-state="empty"');
+    expect(html).toContain("仅源语言装载");
+  });
+
+  it("PerformancePanel：慢翻译清单展开与截断", () => {
+    const html = renderToString(
+      <PerformancePanel
+        metrics={{
+          totalCalls: 4, cacheHits: 0, cacheMisses: 4, averageDuration: 1, maxDuration: 20,
+          slowTranslations: [
+            { key: "slow.a", duration: 20, timestamp: 1, cached: false },
+            { key: "slow.b", duration: 15, timestamp: 2, cached: true },
+          ],
+        }}
+        slowLimit={1}
+      />,
+    );
+    expect(asText(html)).toContain("慢翻译 2 条");
+    expect(html).toContain("slow.a");
+    expect(html).not.toContain("slow.b"); // slowLimit=1 截断
+  });
+
+  it("CoveragePanel：缺失清单按 missingLimit 截断", () => {
+    const html = renderToString(
+      <CoveragePanel coverage={[{ locale: "ja", totalKeys: 3, missingCount: 2, missing: ["m.one", "m.two"] }]} missingLimit={1} />,
+    );
+    expect(asText(html)).toContain("缺失 2");
+    expect(html).toContain("m.one");
+    expect(html).not.toContain("m.two"); // missingLimit=1 截断
+  });
+
+  it("AuditPanel：空缓冲（接入但暂无条目）", () => {
+    const html = renderToString(<AuditPanel entries={[]} />);
+    expect(html).toContain('data-state="empty"');
+    expect(html).toContain("暂无条目");
+  });
 });
 
 // ============================================================
