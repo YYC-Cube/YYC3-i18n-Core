@@ -178,7 +178,19 @@ export class I18nEngine {
           this.handleError(error, { key: "", locale });
           return;
         }
-        this.state.translations[locale] = translation;
+        // TOCTOU 复查：await 挂起窗口内消费者可能已 registerTranslation 接管该 locale
+        //（典型：构造期 loadInitialLocale fire-and-forget 与消费者构造后同步注册竞速，
+        // 曾整体替换消费者词条 → 引擎查无 App 键回退英文，Admin 37 用例失败根因）。
+        // 消费者显式注册即表达"我接管此 locale"——跳过内置包整体替换，词条以消费者为准。
+        if (this.state.translations[locale]) {
+          if (this.debugMode) {
+            logger.debug(
+              `⏭️ Lazy translation load for ${locale} skipped: registered by consumer during load`
+            );
+          }
+        } else {
+          this.state.translations[locale] = translation;
+        }
       } catch (e) {
         if (generation !== this.localeGeneration) return;
         const error = e instanceof Error ? e : new Error(String(e));

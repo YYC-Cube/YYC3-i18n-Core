@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.6.1] - 2026-11-27
+
+**TOCTOU 行为修复**：`setLocale` 异步内置语言包加载完成时不再整体替换消费者已注册的同 locale 词条（Admin 仓 3.0.2→3.6.0 升级 37 用例失败根因，Auraflow 同款潜伏）。patch 级行为修复，零导出面变化。
+
+### 🐛 修复
+
+- **`setLocale` 懒加载 × `registerTranslation` 竞态（TOCTOU）闭合**：v3.1.0 起（`5e5f30c` C7 显式 locale 优先），`new I18nEngine({ locale: 'zh-CN' })` 构造函数 fire-and-forget `void this.setLocale('zh-CN')`，其异步 `loadLazyLocaleTranslation` 完成后**无条件整体赋值** `state.translations[locale]`——把消费者在构造后同步 `registerTranslation` 注册的 App 词条覆盖为内置包；引擎 locale 恰为该 locale 时 `t()` 查无 App 键回退英文（Admin 模式：34 例中文断言找不到目标 + 3 例文案重复渲染）。修复：await 恢复后、赋值前**复查该 locale 是否已被消费者注册**——已注册则跳过内置包整体替换（消费者显式注册即表达"我接管此 locale"），locale 切换/持久化/通知链路照常；C8 世代守卫只护 setLocale 完成序，不护此窗口，故复查必须位于同一同步段
+- **边界语义锚定**：跳过整体替换 ≠ 按键合并——内置包字段不会混入消费者词条（`t('builtin.*')` 走缺键回退）；注册先于 `setLocale` 的场景 `needsTranslationLoad` 依旧短路不进加载路径；无消费者注册时内置懒加载行为完全不变
+
+### 🧪 复测总账
+
+847 测试全绿（新增 4：`src/test/engine-toctou.test.ts` —— 构造期 fire-and-forget 竞态 + 显式 setLocale await 窗口竞态（经懒加载 deferred 精确控制窗口开闭，修复前确定性复现 Admin 失败模式）+ 无注册不阻塞 + 注册先行短路防回归）；typecheck 0 错；构建产物全量生成；标头标尾门禁 174/174 全绿
+
+---
+
 ## [3.6.0] - 2026-11-16
 
 502 方案 **P1-a 工作流持久化**（SSO 工作流生产化收口）+ 导出面/流程双决策落地。
